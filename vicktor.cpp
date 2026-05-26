@@ -1,14 +1,15 @@
+#ifndef VICKTOR_HPP
+#define VICKTOR_HPP
+
 #include <iostream>
 #include <cmath>
+#include "vicktor.hpp"
 
 struct Vicktor
 {
     double x{};
     double y{};
-};
 
-struct Operations
-{
     Vicktor sum(Vicktor p, Vicktor q)
     {
         Vicktor vector_update{};
@@ -38,4 +39,7 @@ struct Operations
     {
         return sqrt(pow(p.x, 2.0) + pow(p.y, 2.0));
     }
-};
+
+    };
+
+#endif
