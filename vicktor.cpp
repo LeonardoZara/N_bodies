@@ -6,6 +6,7 @@ struct Vicktor
     double x{};
     double y{};
 };
+
 struct Operations
 {
     Vicktor sum(Vicktor p, Vicktor q)
@@ -35,7 +36,6 @@ struct Operations
 
     double module(Vicktor p)
     {
-
         return sqrt(pow(p.x, 2.0) + pow(p.y, 2.0));
     }
 };
