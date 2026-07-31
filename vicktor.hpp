@@ -1,3 +1,6 @@
+#ifndef VICKTOR_HPP
+#define VICKTOR_HPP
+
 struct Vicktor
 {
     double x{};
@@ -15,3 +18,5 @@ struct Vicktor
     double module(Vicktor p);
 
 };
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef BODY_HPP
+#define BODY_HPP
+
 #include "vicktor.hpp"
 #include <cmath>
 #include <vector>
@@ -12,13 +15,13 @@ class Planet
     Vicktor position;
     Vicktor velocity;
     Vicktor acceleration;
-    Planet (){
-        position.x=0;
-        position.y=0;
-        velocity.x=0;
-        velocity.y=0;
-        acceleration.x=0;
-        acceleration.y=0;
+    Planet costruttore(double posx, double velx, double accex, double posy, double vely, double accey){
+        position.x=posx;
+        position.y=posy;
+        velocity.x=velx;
+        velocity.y=vely;
+        acceleration.x=accex;
+        acceleration.y=accey;
     }
 
     double getMass() const {
@@ -31,3 +34,4 @@ class Planet
 
 };
 
+#endif

@@ -4,10 +4,13 @@
 #include <cmath>
 #include <vector>
 #include <iostream>
-double const G{66743 * 10 ^ (-15)};
-class simulation
+
+class Simulation
 {
+    double const G{66743 * 10 ^ (-15)};
     double const epsilon{pow(10, -12)};
+    public:
+
     std::vector<Planet> bodies;
 
     void step(double dt)

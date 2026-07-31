@@ -1,6 +1,11 @@
 #include <iostream>
-
-int main(){
-  std::cout<<"Hello! CIAO PROVA "<<'\n';
-  std::cout<<"ciao prova 2"<<'\n';
+#include "N_bodies.hpp"
+int main()
+{
+  Simulation prova;
+  for (int i = 0; i < 10000; ++i)
+  {
+    prova.step(1);
+  }
+  return 0;
 }
