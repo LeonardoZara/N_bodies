@@ -39,7 +39,6 @@ struct Vicktor
     {
         return sqrt(pow(p.x, 2.0) + pow(p.y, 2.0));
     }
-
-    };
+ };
 
 #endif

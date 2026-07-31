@@ -4,17 +4,30 @@
 
 class Planet
 {
-    double mass{};
-    double pos_x{};
-    double pos_y{};
-    double vel_x{};
-    double vel_y{};
-    double acc_x{};
-    double acc_y{};
+    double mass;
     double diameter{};
-
-    Vicktor pos;
-    pos.x = pos_x;
     double const epsilon{pow(10, -12)};
+
+    public:
+    Vicktor position;
+    Vicktor velocity;
+    Vicktor acceleration;
+    Planet (){
+        position.x=0;
+        position.y=0;
+        velocity.x=0;
+        velocity.y=0;
+        acceleration.x=0;
+        acceleration.y=0;
+    }
+
+    double getMass() const {
+        return mass;
+    }
+
+    double getEpsilon() const {
+        return epsilon;
+    }
+
 };
 
