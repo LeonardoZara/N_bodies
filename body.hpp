@@ -1,9 +1,9 @@
 #ifndef BODY_HPP
 #define BODY_HPP
-
-#include "vicktor.hpp"
 #include <cmath>
 #include <vector>
+#include "vicktor.hpp"
+
 
 class Planet
 {
@@ -15,7 +15,7 @@ class Planet
     Vicktor position;
     Vicktor velocity;
     Vicktor acceleration;
-    Planet costruttore(double posx, double velx, double accex, double posy, double vely, double accey){
+    Planet (double posx, double velx, double accex, double posy, double vely, double accey){
         position.x=posx;
         position.y=posy;
         velocity.x=velx;
@@ -33,5 +33,4 @@ class Planet
     }
 
 };
-
 #endif
