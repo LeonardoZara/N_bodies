@@ -18,8 +18,8 @@ void Simulation::step(double dt)
         {
             if (j != i)
             {
-                bodies[i].acceleration.x = G * bodies[i].getMass() * (bodies[i].position.x - bodies[j].position.x) / pow(pow(bodies[j].position.x - bodies[i].position.x, 2) + pow(epsilon, 2), 1.5);
-                bodies[i].acceleration.y = G * bodies[i].getMass() * (bodies[i].position.y - bodies[j].position.y) / pow(pow(bodies[j].position.y - bodies[i].position.y, 2) + pow(epsilon, 2), 1.5);
+                bodies[i].acceleration.x += G * bodies[j].getMass() * (bodies[i].position.x - bodies[j].position.x) / pow(pow(bodies[j].position.x - bodies[i].position.x, 2) + pow(epsilon, 2), 1.5);
+                bodies[i].acceleration.y += G * bodies[j].getMass() * (bodies[i].position.y - bodies[j].position.y) / pow(pow(bodies[j].position.y - bodies[i].position.y, 2) + pow(epsilon, 2), 1.5);
             }
         }
         bodies[i].acceleration = bodies[i].acceleration.scalar_multi(bodies[i].acceleration, -1);

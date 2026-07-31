@@ -9,7 +9,7 @@
 
 class Simulation
 {
-    double const G{66743 * 10 ^ (-15)};
+    double const G{6.6743e-11};
     double const epsilon{pow(10, -12)};
     public:
     std::vector<Planet> bodies;
