@@ -7,7 +7,6 @@
 
 class Planet
 {
-    double mass;
     double diameter{};
     double const epsilon{pow(10, -12)};
 
@@ -15,7 +14,9 @@ class Planet
     Vicktor position;
     Vicktor velocity;
     Vicktor acceleration;
-    Planet (double posx, double velx, double accex, double posy, double vely, double accey){
+    double mass;
+    Planet (double m, double posx, double velx, double accex = 0., double posy, double vely, double accey=0.){
+        mass = m;
         position.x=posx;
         position.y=posy;
         velocity.x=velx;
