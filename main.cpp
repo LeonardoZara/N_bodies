@@ -17,12 +17,15 @@ int main()
   double initEnergy = solar_system.consEnergy();
   std::cout << "Energia meccanica iniziale: " << initEnergy << '\n';
   solar_system.energiesHistory.push_back(initEnergy);
+
   double initAngularMomentum = solar_system.consAngularMomentum();
   std::cout << "Momento angolare iniziale: " << initAngularMomentum << '\n';
   solar_system.angularMomentumHistory.push_back(initAngularMomentum);
+
   double initMomentum = solar_system.consMomentum().module(solar_system.consMomentum());
   std::cout << "Quantità di moto iniziale: " << initMomentum << '\n';
   solar_system.momentumHistory.push_back(initMomentum);
+
   for (int i = 0; i < n_steps; ++i)
   {
     solar_system.step(dt);

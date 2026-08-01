@@ -4,7 +4,7 @@
 #include "vicktor.hpp"
 #include "N_bodies.hpp"
 
-static Vicktor gravAcceleration(const std::vector<Planet> &bodies, size_t i, double G, double epsilon)
+Vicktor gravAcceleration(const std::vector<Planet> &bodies, size_t i, double G, double epsilon)
 {
     Vicktor acc{};
     for (size_t j = 0; j < bodies.size(); ++j)
@@ -24,37 +24,56 @@ static Vicktor gravAcceleration(const std::vector<Planet> &bodies, size_t i, dou
 
 double Simulation::consEnergy()
 {
-    //Conservazione energia:
+    // Conservazione energia:
     double k{0};
     double u{0};
-    for(size_t i=0; i<bodies.size(); ++i){
-        k+=0.5*bodies[i].getMass()*pow(bodies[i].velocity.module(bodies[i].velocity), 2);
+    for (size_t i = 0; i < bodies.size(); ++i)
+    {
+        k += 0.5 * bodies[i].getMass() * pow(bodies[i].velocity.module(bodies[i].velocity), 2);
     }
-    for(size_t j=1; j<bodies.size(); ++j){
-        for(size_t i=0; i<j; ++i){
+    for (size_t j = 1; j < bodies.size(); ++j)
+    {
+        for (size_t i = 0; i < j; ++i)
+        {
             Vicktor distance = bodies[i].position.subtract(bodies[i].position, bodies[j].position);
-            u+= -G*bodies[i].getMass()*bodies[j].getMass()/bodies[i].position.module(distance);
+            u += -G * bodies[i].getMass() * bodies[j].getMass() / bodies[i].position.module(distance);
         }
     }
     return k + u;
 }
+
+Vicktor Simulation::centreOfMass()
+{
+    Vicktor cm{0, 0};
+    Vicktor cmNumerator{0., 0.};
+    double totalMass{0.};
+    for (size_t i = 0; i < bodies.size(); ++i){
+        cmNumerator = cm.sum(cm, cm.scalar_multi(bodies[i].velocity, bodies[i].getMass()));
+        totalMass += bodies[i].getMass();
+    }
+    cm = cm.scalar_multi(cmNumerator, (1/totalMass));
+    return cm;
+}
+
 double Simulation::consAngularMomentum()
 {
     double angularMomentum{0};
-    for(size_t i=0; i<bodies.size(); ++i){
-        angularMomentum += bodies[i].getMass()*((bodies[i].position.x*bodies[i].velocity.x) - (bodies[i].position.y*bodies[i].velocity.y));
+    for (size_t i = 0; i < bodies.size(); ++i)
+    {
+        angularMomentum += bodies[i].getMass() * (((bodies[i].position.x - centreOfMass().x) * bodies[i].velocity.x) - ((bodies[i].position.y - centreOfMass().y) * bodies[i].velocity.y));
     }
     return angularMomentum;
 }
+
 Vicktor Simulation::consMomentum()
 {
-    Vicktor momentum;
-    for (size_t i=0; i< bodies.size(); ++i){
-        momentum = bodies[i].velocity.sum(momentum, bodies[i].velocity.scalar_multi(bodies[i].velocity, bodies[i].getMass()));
-
+    Vicktor momentum{0., 0.};
+   
+    for (size_t i = 0; i < bodies.size(); ++i)
+    {
+        momentum = momentum.sum(momentum, bodies[i].velocity.scalar_multi(bodies[i].velocity, bodies[i].getMass()));
     }
     return momentum;
-
 }
 
 void Simulation::initAccelerations()

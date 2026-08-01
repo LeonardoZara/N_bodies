@@ -28,6 +28,9 @@ class Planet
     double getMass() const {
         return mass;
     }
+    double getDiameter() const {
+        return diameter;
+    }
 };
 
 class Simulation
@@ -40,6 +43,7 @@ class Simulation
     std::vector<double> angularMomentumHistory;
     std::vector<double> momentumHistory;
     double consEnergy();
+    Vicktor centreOfMass();
     double consAngularMomentum();
     Vicktor consMomentum();
     void initAccelerations();
