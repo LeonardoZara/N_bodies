@@ -3,6 +3,7 @@
 #include <cmath>
 #include <vector>
 #include <iostream>
+#include <string>
 #include "vicktor.hpp"
 
 class Planet
@@ -42,8 +43,10 @@ class Simulation
     std::vector<double> energiesHistory;
     std::vector<double> angularMomentumHistory;
     std::vector<double> momentumHistory;
+    void loadFromFile(const std::string &filename);
     double consEnergy();
     Vicktor centreOfMass();
+    double totalMass();
     double consAngularMomentum();
     Vicktor consMomentum();
     void initAccelerations();

@@ -5,14 +5,19 @@ int main()
 {
   Simulation solar_system;
 
-  solar_system.bodies.emplace_back(1.989e30, 0.0, 0.0, 0.0, 0.0);          // sole
-  solar_system.bodies.emplace_back(5.972e24, 1.496e11, 0.0, 0.0, 29780.0); // terra
-
+  try
+  {
+    solar_system.loadFromFile("dati.txt");
+  }
+  catch (const std::exception &e)
+  {
+    std::cerr << "Errore nel caricamento dei corpi: " << e.what() << '\n';
+    return 1;
+  }
   solar_system.initAccelerations();
 
   double dt = 3600.0;
   int n_steps = 24 * 365;
-
 
   double initEnergy = solar_system.consEnergy();
   std::cout << "Energia meccanica iniziale: " << initEnergy << '\n';
@@ -39,13 +44,13 @@ int main()
   }
   double maxEnergy = *std::max_element(std::begin(solar_system.energiesHistory), std::end(solar_system.energiesHistory));
   double minEnergy = *std::min_element(std::begin(solar_system.energiesHistory), std::end(solar_system.energiesHistory));
-  std::cout << "L'energia oscilla tra " << maxEnergy << " e " << minEnergy <<'\n';
+  std::cout << "L'energia oscilla tra " << maxEnergy << " e " << minEnergy << '\n';
 
   double maxAngularMomentum = *std::max_element(std::begin(solar_system.angularMomentumHistory), std::end(solar_system.angularMomentumHistory));
   double minAngularMomentum = *std::min_element(std::begin(solar_system.angularMomentumHistory), std::end(solar_system.angularMomentumHistory));
-  std::cout << "Il momento angolare oscilla tra " << maxAngularMomentum << " e " << minAngularMomentum <<'\n';
+  std::cout << "Il momento angolare oscilla tra " << maxAngularMomentum << " e " << minAngularMomentum << '\n';
 
   double maxMomentum = *std::max_element(std::begin(solar_system.momentumHistory), std::end(solar_system.momentumHistory));
   double minMomentum = *std::min_element(std::begin(solar_system.momentumHistory), std::end(solar_system.momentumHistory));
-  std::cout << "la quantità di moto oscilla tra " << maxMomentum << " e " << minMomentum <<'\n';
+  std::cout << "la quantità di moto oscilla tra " << maxMomentum << " e " << minMomentum << '\n';
 }

@@ -1,10 +1,41 @@
 #include <cmath>
 #include <vector>
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <stdexcept>
 #include "vicktor.hpp"
 #include "N_bodies.hpp"
 
-Vicktor gravAcceleration(const std::vector<Planet> &bodies, size_t i, double G, double epsilon)
+void Simulation::loadFromFile(const std::string &filename)
+{
+    std::ifstream file(filename);
+    if (!file.is_open())
+    {
+        throw std::runtime_error("Impossibile aprire il file: " + filename);
+    }
+    bodies.clear();
+    std::string line;
+    while (std::getline(file, line))
+    {
+        if (line.empty() || line[0] == '#')
+        {
+            continue;
+        }
+
+        std::istringstream iss(line);
+        double m, posx, posy, velx, vely;
+        if (!(iss >> m >> posx >> posy >> velx >> vely))
+            throw std::runtime_error("Riga malformata nel file bodies: " + line);
+
+        bodies.emplace_back(m, posx, posy, velx, vely);
+    }
+
+    if (bodies.empty())
+        throw std::runtime_error("Nessun corpo caricato dal file: " + filename);
+}
+
+static Vicktor gravAcceleration(const std::vector<Planet> &bodies, size_t i, double G, double epsilon)
 {
     Vicktor acc{};
     for (size_t j = 0; j < bodies.size(); ++j)
@@ -47,20 +78,32 @@ Vicktor Simulation::centreOfMass()
     Vicktor cm{0, 0};
     Vicktor cmNumerator{0., 0.};
     double totalMass{0.};
-    for (size_t i = 0; i < bodies.size(); ++i){
-        cmNumerator = cm.sum(cm, cm.scalar_multi(bodies[i].velocity, bodies[i].getMass()));
+    for (size_t i = 0; i < bodies.size(); ++i)
+    {
+        cmNumerator = cm.sum(cm, cm.scalar_multi(bodies[i].position, bodies[i].getMass()));
         totalMass += bodies[i].getMass();
     }
-    cm = cm.scalar_multi(cmNumerator, (1/totalMass));
+    cm = cm.scalar_multi(cmNumerator, (1 / totalMass));
     return cm;
+}
+
+double Simulation::totalMass()
+{
+    double totalMass{0.};
+    for (size_t i = 0; i < bodies.size(); ++i)
+    {
+        totalMass += bodies[i].getMass();
+    }
+    return totalMass;
 }
 
 double Simulation::consAngularMomentum()
 {
+    Vicktor cm = centreOfMass();
     double angularMomentum{0};
     for (size_t i = 0; i < bodies.size(); ++i)
     {
-        angularMomentum += bodies[i].getMass() * (((bodies[i].position.x - centreOfMass().x) * bodies[i].velocity.x) - ((bodies[i].position.y - centreOfMass().y) * bodies[i].velocity.y));
+        angularMomentum += bodies[i].getMass() * (((bodies[i].position.x - cm.x) * bodies[i].velocity.y) - (((bodies[i].position.y - cm.y) * bodies[i].velocity.x)));
     }
     return angularMomentum;
 }
@@ -68,7 +111,7 @@ double Simulation::consAngularMomentum()
 Vicktor Simulation::consMomentum()
 {
     Vicktor momentum{0., 0.};
-   
+
     for (size_t i = 0; i < bodies.size(); ++i)
     {
         momentum = momentum.sum(momentum, bodies[i].velocity.scalar_multi(bodies[i].velocity, bodies[i].getMass()));
