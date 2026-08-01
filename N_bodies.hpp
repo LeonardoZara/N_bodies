@@ -10,26 +10,28 @@ class Planet
 {
     double diameter{};
 
-    public:
+public:
     Vicktor position;
     Vicktor velocity;
     Vicktor acceleration;
     double mass;
-     Planet (double m, double posx, double posy, double velx, double vely, double accex = 0.0, double accey = 0.0)
-    : mass(m)
+    Planet(double m, double posx, double posy, double velx, double vely, double accex = 0.0, double accey = 0.0)
+        : mass(m)
     {
-        position.x=posx;
-        position.y=posy;
-        velocity.x=velx;
-        velocity.y=vely;
-        acceleration.x=accex;
-        acceleration.y=accey;
+        position.x = posx;
+        position.y = posy;
+        velocity.x = velx;
+        velocity.y = vely;
+        acceleration.x = accex;
+        acceleration.y = accey;
     }
 
-    double getMass() const {
+    double getMass() const
+    {
         return mass;
     }
-    double getDiameter() const {
+    double getDiameter() const
+    {
         return diameter;
     }
 };
@@ -38,7 +40,8 @@ class Simulation
 {
     double const G{6.6743e-11};
     double const epsilon{1e-12};
-    public:
+
+public:
     std::vector<Planet> bodies;
     std::vector<double> energiesHistory;
     std::vector<double> angularMomentumHistory;
