@@ -3,7 +3,6 @@
 #include <iostream>
 #include "vicktor.hpp"
 #include "N_bodies.hpp"
-#include "body.hpp"
 
 static Vicktor gravAcceleration(const std::vector<Planet> &bodies, size_t i, double G, double epsilon)
 {
