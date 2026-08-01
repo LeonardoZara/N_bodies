@@ -12,9 +12,15 @@ int main()
 
   double dt = 3600.0;
   int n_steps = 24 * 365;
+
+
   double initEnergy = solar_system.consEnergy();
   std::cout << "Energia meccanica iniziale: " << initEnergy << '\n';
   solar_system.energiesHistory.push_back(initEnergy);
+  double initAngularMomentum = solar_system.consAngularMomentum();
+  std::cout << "Momento angolare iniziale: " << initAngularMomentum << '\n';
+  solar_system.angularMomentumHistory.push_back(initAngularMomentum);
+
   for (int i = 0; i < n_steps; ++i)
   {
     solar_system.step(dt);
@@ -29,5 +35,8 @@ int main()
   double maxEnergy = *std::max_element(std::begin(solar_system.energiesHistory), std::end(solar_system.energiesHistory));
   double minEnergy = *std::min_element(std::begin(solar_system.energiesHistory), std::end(solar_system.energiesHistory));
   std::cout << "L'energia oscilla tra " << maxEnergy << " e " << minEnergy <<'\n';
-  std::cout << "size di energiesHistory: " << solar_system.energiesHistory.size()<< '\n';
+
+  double maxAngularMomentum = *std::max_element(std::begin(solar_system.angularMomentumHistory), std::end(solar_system.angularMomentumHistory));
+  double minAngularMomentum = *std::min_element(std::begin(solar_system.angularMomentumHistory), std::end(solar_system.angularMomentumHistory));
+  std::cout << "Il momento angolare oscilla tra " << maxAngularMomentum << " e " << minAngularMomentum <<'\n';
 }

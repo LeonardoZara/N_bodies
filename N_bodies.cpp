@@ -38,6 +38,14 @@ double Simulation::consEnergy()
     }
     return k + u;
 }
+double Simulation::consAngularMomentum()
+{
+    double angularMomentum{0};
+    for(size_t i=0; i<bodies.size(); ++i){
+        angularMomentum += bodies[i].getMass()*((bodies[i].position.x*bodies[i].velocity.x) - (bodies[i].position.y*bodies[i].velocity.y));
+    }
+    return angularMomentum;
+}
 
 void Simulation::initAccelerations()
 {
@@ -64,4 +72,5 @@ void Simulation::step(double dt)
         bodies[i].acceleration = acc_new;
     }
     energiesHistory.push_back(consEnergy());
+    angularMomentumHistory.push_back(consAngularMomentum());
 }

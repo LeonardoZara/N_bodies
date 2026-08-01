@@ -37,7 +37,9 @@ class Simulation
     public:
     std::vector<Planet> bodies;
     std::vector<double> energiesHistory;
+    std::vector<double> angularMomentumHistory;
     double consEnergy();
+    double consAngularMomentum();
     void initAccelerations();
     void step(double dt);
 };
