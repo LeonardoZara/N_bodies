@@ -38,8 +38,10 @@ class Simulation
     std::vector<Planet> bodies;
     std::vector<double> energiesHistory;
     std::vector<double> angularMomentumHistory;
+    std::vector<double> momentumHistory;
     double consEnergy();
     double consAngularMomentum();
+    Vicktor consMomentum();
     void initAccelerations();
     void step(double dt);
 };

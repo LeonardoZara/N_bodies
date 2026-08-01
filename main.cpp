@@ -20,7 +20,9 @@ int main()
   double initAngularMomentum = solar_system.consAngularMomentum();
   std::cout << "Momento angolare iniziale: " << initAngularMomentum << '\n';
   solar_system.angularMomentumHistory.push_back(initAngularMomentum);
-
+  double initMomentum = solar_system.consMomentum().module(solar_system.consMomentum());
+  std::cout << "Quantità di moto iniziale: " << initMomentum << '\n';
+  solar_system.momentumHistory.push_back(initMomentum);
   for (int i = 0; i < n_steps; ++i)
   {
     solar_system.step(dt);
@@ -39,4 +41,8 @@ int main()
   double maxAngularMomentum = *std::max_element(std::begin(solar_system.angularMomentumHistory), std::end(solar_system.angularMomentumHistory));
   double minAngularMomentum = *std::min_element(std::begin(solar_system.angularMomentumHistory), std::end(solar_system.angularMomentumHistory));
   std::cout << "Il momento angolare oscilla tra " << maxAngularMomentum << " e " << minAngularMomentum <<'\n';
+
+  double maxMomentum = *std::max_element(std::begin(solar_system.momentumHistory), std::end(solar_system.momentumHistory));
+  double minMomentum = *std::min_element(std::begin(solar_system.momentumHistory), std::end(solar_system.momentumHistory));
+  std::cout << "la quantità di moto oscilla tra " << maxMomentum << " e " << minMomentum <<'\n';
 }

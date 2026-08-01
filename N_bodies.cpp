@@ -46,6 +46,16 @@ double Simulation::consAngularMomentum()
     }
     return angularMomentum;
 }
+Vicktor Simulation::consMomentum()
+{
+    Vicktor momentum;
+    for (size_t i=0; i< bodies.size(); ++i){
+        momentum = bodies[i].velocity.sum(momentum, bodies[i].velocity.scalar_multi(bodies[i].velocity, bodies[i].getMass()));
+
+    }
+    return momentum;
+
+}
 
 void Simulation::initAccelerations()
 {
@@ -73,4 +83,5 @@ void Simulation::step(double dt)
     }
     energiesHistory.push_back(consEnergy());
     angularMomentumHistory.push_back(consAngularMomentum());
+    momentumHistory.push_back(consMomentum().module(consMomentum()));
 }
