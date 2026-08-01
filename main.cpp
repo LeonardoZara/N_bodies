@@ -14,7 +14,7 @@ int main()
   int n_steps = 24 * 365;
   double initEnergy = solar_system.consEnergy();
   std::cout << "Energia meccanica iniziale: " << initEnergy << '\n';
-
+  solar_system.energiesHistory.push_back(initEnergy);
   for (int i = 0; i < n_steps; ++i)
   {
     solar_system.step(dt);
@@ -26,7 +26,6 @@ int main()
       std::cout << "Energia meccanica: " << solar_system.consEnergy() << '\n';
     }
   }
-
   double maxEnergy = *std::max_element(std::begin(solar_system.energiesHistory), std::end(solar_system.energiesHistory));
   double minEnergy = *std::min_element(std::begin(solar_system.energiesHistory), std::end(solar_system.energiesHistory));
   std::cout << "L'energia oscilla tra " << maxEnergy << " e " << minEnergy <<'\n';
