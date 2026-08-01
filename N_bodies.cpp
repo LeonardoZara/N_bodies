@@ -22,6 +22,23 @@ static Vicktor gravAcceleration(const std::vector<Planet> &bodies, size_t i, dou
     return acc;
 }
 
+double Simulation::consEnergy()
+{
+    //Conservazione energia:
+    double k{0};
+    double u{0};
+    for(size_t i=0; i<bodies.size(); ++i){
+        k+=0.5*bodies[i].getMass()*pow(bodies[i].velocity.module(bodies[i].velocity), 2);
+    }
+    for(size_t j=1; j<bodies.size(); ++j){
+        for(size_t i=0; i<j; ++i){
+            Vicktor distance = bodies[i].position.subtract(bodies[i].position, bodies[j].position);
+            u+= -G*bodies[i].getMass()*bodies[j].getMass()/bodies[i].position.module(distance);
+        }
+    }
+    return k + u;
+}
+
 void Simulation::initAccelerations()
 {
     for (size_t i = 0; i < bodies.size(); ++i)
@@ -38,14 +55,13 @@ void Simulation::step(double dt)
             bodies[i].position.sum(bodies[i].position, bodies[i].velocity.scalar_multi(bodies[i].velocity, dt)),
             bodies[i].acceleration.scalar_multi(bodies[i].acceleration, 0.5 * dt * dt));
     }
-
     for (size_t i = 0; i < bodies.size(); ++i)
     {
         Vicktor acc_old = bodies[i].acceleration;
         Vicktor acc_new = gravAcceleration(bodies, i, G, epsilon);
         Vicktor acc_sum = acc_old.sum(acc_old, acc_new);
-
         bodies[i].velocity = bodies[i].velocity.sum(bodies[i].velocity, bodies[i].velocity.scalar_multi(acc_sum, 0.5 * dt));
         bodies[i].acceleration = acc_new;
     }
+    energiesHistory.push_back(consEnergy());
 }

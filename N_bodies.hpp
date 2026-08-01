@@ -36,7 +36,8 @@ class Simulation
     double const epsilon{1e-12};
     public:
     std::vector<Planet> bodies;
- 
+    std::vector<double> energiesHistory = {consEnergy()};
+    double consEnergy();
     void initAccelerations();
     void step(double dt);
 };
