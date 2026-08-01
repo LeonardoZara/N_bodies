@@ -10,10 +10,11 @@
 class Simulation
 {
     double const G{6.6743e-11};
-    double const epsilon{pow(10, -12)};
+    double const epsilon{1e-12};
     public:
     std::vector<Planet> bodies;
-
+ 
+    void initAccelerations();
     void step(double dt);
 };
 #endif

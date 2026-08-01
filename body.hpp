@@ -8,15 +8,15 @@
 class Planet
 {
     double diameter{};
-    double const epsilon{pow(10, -12)};
 
     public:
     Vicktor position;
     Vicktor velocity;
     Vicktor acceleration;
     double mass;
-    Planet (double m, double posx, double velx, double accex = 0., double posy, double vely, double accey=0.){
-        mass = m;
+     Planet (double m, double posx, double posy, double velx, double vely, double accex = 0.0, double accey = 0.0)
+    : mass(m)
+    {
         position.x=posx;
         position.y=posy;
         velocity.x=velx;
@@ -28,10 +28,5 @@ class Planet
     double getMass() const {
         return mass;
     }
-
-    double getEpsilon() const {
-        return epsilon;
-    }
-
 };
 #endif
