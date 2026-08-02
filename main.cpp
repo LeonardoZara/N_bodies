@@ -53,4 +53,7 @@ int main()
   double maxMomentum = *std::max_element(std::begin(solar_system.momentumHistory), std::end(solar_system.momentumHistory));
   double minMomentum = *std::min_element(std::begin(solar_system.momentumHistory), std::end(solar_system.momentumHistory));
   std::cout << "la quantità di moto oscilla tra " << maxMomentum << " e " << minMomentum << '\n';
+  std::cout << "la massa del corpo uno è" << solar_system.bodies[0].getMass() << '\n';
+  std::cout << "la massa del corpo due è" << solar_system.bodies[1].getMass() << '\n';
+
 }

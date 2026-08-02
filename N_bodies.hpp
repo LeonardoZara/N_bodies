@@ -8,7 +8,7 @@
 
 class Planet
 {
-    double diameter{};
+    double radius{};
 
 public:
     Vicktor position;
@@ -30,9 +30,9 @@ public:
     {
         return mass;
     }
-    double getDiameter() const
+    double getRadius() const
     {
-        return diameter;
+        return radius;
     }
 };
 

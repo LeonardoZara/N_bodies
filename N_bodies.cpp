@@ -5,6 +5,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <type_traits>
+#include <algorithm>
 #include "vicktor.hpp"
 #include "N_bodies.hpp"
 
@@ -25,28 +26,35 @@ void Simulation::loadFromFile(const std::string &filename)
         }
 
         std::istringstream iss(line);
-        double m, posx, posy, velx, vely;
-        if (!(iss >> m >> posx >> posy >> velx >> vely))
+        double m, posx, posy, velx, vely, radius;
+        if (!(iss >> m >> posx >> posy >> velx >> vely >> radius))
         {
             throw std::runtime_error("Riga malformata nel file dati: " + line);
         }
-        if((std::is_same<decltype(m, posx, posy, velx, vely), double>::value)){
+        if ((std::is_same<decltype(m, posx, posy, velx, vely, radius), double>::value))
+        {
             throw std::runtime_error("I dati del file input devono essere dei double." + line);
         }
-        if(m<=0){
+        if (m <= 0)
+        {
             throw std::runtime_error("La massa non può essere negativa." + line);
         }
-        if(velx>=3e8 || vely>=3e8){
+        if (radius <= 0)
+        {
+            throw std::runtime_error("Il raggio non può essere negativo." + line);
+        }
+        if (velx >= 3e8 || vely >= 3e8)
+        {
             throw std::runtime_error("La velocità dei corpi deve essere minore di quella della luce." + line);
         }
-        bodies.emplace_back(m, posx, posy, velx, vely);
+        bodies.emplace_back(m, posx, posy, velx, vely, radius);
     }
 
     if (bodies.empty())
         throw std::runtime_error("Nessun corpo caricato dal file: " + filename);
 }
 
-static Vicktor gravAcceleration(const std::vector<Planet> &bodies, size_t i, double G, double epsilon)
+static Vicktor gravAcceleration(const std::vector<Planet> &bodies, size_t i, double G)
 {
     Vicktor acc{};
     for (size_t j = 0; j < bodies.size(); ++j)
@@ -56,7 +64,7 @@ static Vicktor gravAcceleration(const std::vector<Planet> &bodies, size_t i, dou
 
         double dx = bodies[j].position.x - bodies[i].position.x;
         double dy = bodies[j].position.y - bodies[i].position.y;
-        double denom = pow(dx * dx + dy * dy + epsilon * epsilon, 1.5);
+        double denom = pow(dx * dx + dy * dy, 1.5);
 
         acc.x += G * bodies[j].getMass() * dx / denom;
         acc.y += G * bodies[j].getMass() * dy / denom;
@@ -134,22 +142,43 @@ void Simulation::initAccelerations()
 {
     for (size_t i = 0; i < bodies.size(); ++i)
     {
-        bodies[i].acceleration = gravAcceleration(bodies, i, G, epsilon);
+        bodies[i].acceleration = gravAcceleration(bodies, i, G);
     }
 }
 
 void Simulation::step(double dt)
 {
+    for (size_t j = 1; j < bodies.size(); ++j) // controllo di collisioni
+    {
+        for (size_t i = 0; i < j; ++i)
+        {
+            if (bodies[i].position.module(bodies[i].position.subtract(bodies[i].position, bodies[j].position)) <= (bodies[i].getRadius() + bodies[j].getRadius()))
+            {
+                bodies[j].position = bodies[j].position.scalar_multi(bodies[j].position.sum(bodies[i].position.scalar_multi(bodies[i].position, bodies[i].getMass()), bodies[j].position.scalar_multi(bodies[j].position, bodies[j].getMass())), 1 / (bodies[i].getMass() + bodies[j].getMass()));
+                bodies[j].velocity = bodies[j].velocity.scalar_multi(bodies[j].velocity.sum(bodies[i].velocity.scalar_multi(bodies[i].velocity, bodies[i].getMass()), bodies[j].velocity.scalar_multi(bodies[j].velocity, bodies[j].getMass())), 1 / (bodies[i].getMass() + bodies[j].getMass()));
+                bodies[j].mass += bodies[i].mass;
+                bodies[i].mass = 0.;
+            }
+        }
+    }
     for (size_t i = 0; i < bodies.size(); ++i)
+    {
+        if (bodies[i].mass == 0.)
+        {
+            bodies.erase(bodies.begin() + i);
+        }
+    }
+    // FINE CONTROLLO COLLISIONI
+    for (size_t i = 0; i < bodies.size(); ++i) // calcolo delle posizioni ogni dt
     {
         bodies[i].position = bodies[i].position.sum(
             bodies[i].position.sum(bodies[i].position, bodies[i].velocity.scalar_multi(bodies[i].velocity, dt)),
             bodies[i].acceleration.scalar_multi(bodies[i].acceleration, 0.5 * dt * dt));
     }
-    for (size_t i = 0; i < bodies.size(); ++i)
+    for (size_t i = 0; i < bodies.size(); ++i) // calcolo delle velocità e accelerazioni ogni dt
     {
         Vicktor acc_old = bodies[i].acceleration;
-        Vicktor acc_new = gravAcceleration(bodies, i, G, epsilon);
+        Vicktor acc_new = gravAcceleration(bodies, i, G);
         Vicktor acc_sum = acc_old.sum(acc_old, acc_new);
         bodies[i].velocity = bodies[i].velocity.sum(bodies[i].velocity, bodies[i].velocity.scalar_multi(acc_sum, 0.5 * dt));
         bodies[i].acceleration = acc_new;
