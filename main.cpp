@@ -31,9 +31,20 @@ int main()
   solar_system.momentumHistory.push_back(initMomentum);
 
   double dt = 3600.0;
-  double scale = 300.0 / 1.496e11;
+  double scale = 450.0 / 4.515e12;
 
-  sf::RenderWindow window(sf::VideoMode(800, 800), "N-Body Simulation");
+  sf::RenderWindow window(sf::VideoMode(1000, 1000), "N-Body Simulation");
+  sf::RectangleShape fadeRectangle(sf::Vector2f(800.f, 800.f));
+  fadeRectangle.setFillColor(sf::Color(0, 0, 0, 10)); // L'ultimo valore '10' è la trasparenza (alfa)
+
+  std::vector<sf::Color> palette = {
+      sf::Color::Red,
+      sf::Color::Green,
+      sf::Color::Blue,
+      sf::Color::Yellow,
+      sf::Color::Magenta,
+      sf::Color::Cyan
+  };
 
   while (window.isOpen())
   {
@@ -47,16 +58,20 @@ int main()
     {
       solar_system.step(dt);
     }
-    window.clear(sf::Color::Black);
+    // window.clear(sf::Color::Black);
+    window.draw(fadeRectangle);
 
-    for (auto &body : solar_system.bodies)
+    for (size_t i = 0; i < solar_system.bodies.size(); ++i)
     {
+      auto &body = solar_system.bodies[i];
+      sf::Color bodyColor = palette[i % palette.size()];
+      
       sf::CircleShape circle(6.f); // raggio grafico fisso
-      circle.setFillColor(sf::Color::White);
+      circle.setFillColor(bodyColor);
       circle.setOrigin(6.f, 6.f); // centra il cerchio sul punto
 
-      float screenX = 400 + body.position.x * scale;
-      float screenY = 400 + body.position.y * scale;
+      float screenX = 500 + body.position.x * scale;
+      float screenY = 500 + body.position.y * scale;
       circle.setPosition(screenX, screenY);
 
       window.draw(circle);
