@@ -12,7 +12,7 @@ int main()
   catch (const std::exception &e)
   {
     std::cerr << "Errore nel caricamento dei corpi: " << e.what() << '\n';
-    return 1;
+    return EXIT_FAILURE;
   }
   solar_system.initAccelerations();
 

@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
+#include <type_traits>
 #include "vicktor.hpp"
 #include "N_bodies.hpp"
 
@@ -26,8 +27,18 @@ void Simulation::loadFromFile(const std::string &filename)
         std::istringstream iss(line);
         double m, posx, posy, velx, vely;
         if (!(iss >> m >> posx >> posy >> velx >> vely))
-            throw std::runtime_error("Riga malformata nel file bodies: " + line);
-
+        {
+            throw std::runtime_error("Riga malformata nel file dati: " + line);
+        }
+        if((std::is_same<decltype(m, posx, posy, velx, vely), double>::value)){
+            throw std::runtime_error("I dati del file input devono essere dei double." + line);
+        }
+        if(m<=0){
+            throw std::runtime_error("La massa non può essere negativa." + line);
+        }
+        if(velx>=3e8 || vely>=3e8){
+            throw std::runtime_error("La velocità dei corpi deve essere minore di quella della luce." + line);
+        }
         bodies.emplace_back(m, posx, posy, velx, vely);
     }
 
