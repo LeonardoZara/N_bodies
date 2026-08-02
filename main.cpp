@@ -31,9 +31,9 @@ int main()
   solar_system.momentumHistory.push_back(initMomentum);
 
   double dt = 3600.0;
-  double scale = 350.0 / 1.496e11;
+  double scale = 300.0 / 1.496e11;
 
-  sf::RenderWindow window(sf::VideoMode(800, 600), "N-Body Simulation");
+  sf::RenderWindow window(sf::VideoMode(800, 800), "N-Body Simulation");
 
   while (window.isOpen())
   {
@@ -43,7 +43,7 @@ int main()
       if (event.type == sf::Event::Closed)
         window.close();
     }
-    for (int k = 0; k < 10; k++)
+    for (int k = 0; k < 5; k++)
     {
       solar_system.step(dt);
     }
@@ -56,7 +56,7 @@ int main()
       circle.setOrigin(6.f, 6.f); // centra il cerchio sul punto
 
       float screenX = 400 + body.position.x * scale;
-      float screenY = 300 + body.position.y * scale;
+      float screenY = 400 + body.position.y * scale;
       circle.setPosition(screenX, screenY);
 
       window.draw(circle);
