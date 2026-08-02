@@ -148,6 +148,9 @@ void Simulation::initAccelerations()
 
 void Simulation::step(double dt)
 {
+
+    double totalMassUnmerged{totalMass()};
+    bool merged = false;
     for (size_t j = 1; j < bodies.size(); ++j) // controllo di collisioni
     {
         for (size_t i = 0; i < j; ++i)
@@ -158,6 +161,7 @@ void Simulation::step(double dt)
                 bodies[j].velocity = bodies[j].velocity.scalar_multi(bodies[j].velocity.sum(bodies[i].velocity.scalar_multi(bodies[i].velocity, bodies[i].getMass()), bodies[j].velocity.scalar_multi(bodies[j].velocity, bodies[j].getMass())), 1 / (bodies[i].getMass() + bodies[j].getMass()));
                 bodies[j].mass += bodies[i].mass;
                 bodies[i].mass = 0.;
+                merged = true;
             }
         }
     }
@@ -165,8 +169,20 @@ void Simulation::step(double dt)
     {
         if (bodies[i].mass == 0.)
         {
-            bodies.erase(bodies.begin() + i);
+            bodies.erase(std::remove_if(bodies.begin(), bodies.end(),
+                                        [](const Planet &p)
+                                        { return p.getMass() == 0.0; }),
+                         bodies.end());
         }
+    }
+    if (totalMass() != totalMassUnmerged) //Questo if si attiva solo se 3 o più corpi si toccano nello stesso momento, e l'algoritmo di "trasferimento massa" si romperebbe.
+    {
+        throw std::runtime_error("Ci sono state delle collisioni con più di due corpi in contemporanea, non calcolabili da questo programma.");
+    }
+
+    if (merged == true)
+    {
+        initAccelerations();
     }
     // FINE CONTROLLO COLLISIONI
     for (size_t i = 0; i < bodies.size(); ++i) // calcolo delle posizioni ogni dt

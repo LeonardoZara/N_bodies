@@ -8,15 +8,15 @@
 
 class Planet
 {
-    double radius{};
 
 public:
     Vicktor position;
     Vicktor velocity;
     Vicktor acceleration;
     double mass;
-    Planet(double m, double posx, double posy, double velx, double vely, double accex = 0.0, double accey = 0.0)
-        : mass(m)
+    double radius;
+    Planet(double m, double posx, double posy, double velx, double vely, double r, double accex = 0.0, double accey = 0.0)
+        : mass(m), radius(r)
     {
         position.x = posx;
         position.y = posy;

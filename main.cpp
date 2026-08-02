@@ -36,9 +36,21 @@ int main()
     solar_system.step(dt);
     if (i % (24 * 30) == 0)
     {
-      std::cout << "t = " << (i * dt) / 86400.0 << " giorni | Terra: (" << solar_system.bodies[1].position.x << ", " << solar_system.bodies[1].position.y << ")\n";
+      /*std::cout << "t = " << (i * dt) / 86400.0 << " giorni | Terra: (" << solar_system.bodies[1].position.x << ", " << solar_system.bodies[1].position.y << ")\n";
       std::cout << "velocità sole: " << solar_system.bodies[0].velocity.module(solar_system.bodies[0].velocity) << '\n';
-      std::cout << "velocità terra: " << solar_system.bodies[1].velocity.module(solar_system.bodies[1].velocity) << '\n';
+      std::cout << "velocità terra: " << solar_system.bodies[1].velocity.module(solar_system.bodies[1].velocity) << '\n';*/
+      std::cout << "t = " << (i * dt) / 86400.0 << " giorni | numero corpi: " << solar_system.bodies.size() << '\n';
+
+  if (solar_system.bodies.size() > 1)
+  {
+    std::cout << "Terra: (" << solar_system.bodies[1].position.x << ", " << solar_system.bodies[1].position.y << ")\n";
+    std::cout << "velocità sole: " << solar_system.bodies[0].velocity.module(solar_system.bodies[0].velocity) << '\n';
+    std::cout << "velocità terra: " << solar_system.bodies[1].velocity.module(solar_system.bodies[1].velocity) << '\n';
+  }
+  else
+  {
+    std::cout << "Fusione avvenuta -> massa corpo unico: " << solar_system.bodies[0].getMass() << '\n';
+  }
       std::cout << "Energia meccanica: " << solar_system.consEnergy() << '\n';
     }
   }
@@ -54,6 +66,7 @@ int main()
   double minMomentum = *std::min_element(std::begin(solar_system.momentumHistory), std::end(solar_system.momentumHistory));
   std::cout << "la quantità di moto oscilla tra " << maxMomentum << " e " << minMomentum << '\n';
   std::cout << "la massa del corpo uno è" << solar_system.bodies[0].getMass() << '\n';
-  std::cout << "la massa del corpo due è" << solar_system.bodies[1].getMass() << '\n';
+  if(solar_system.bodies.size()>1){
+  std::cout << "la massa del corpo due è" << solar_system.bodies[1].getMass() << '\n';}
 
 }
