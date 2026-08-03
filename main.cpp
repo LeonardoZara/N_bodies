@@ -1,6 +1,8 @@
 #include <iostream>
 #include <algorithm>
 #include <SFML/Graphics.hpp>
+#include <sstream>
+#include <iomanip>
 #include "N_bodies.hpp"
 
 int main()
@@ -31,10 +33,11 @@ int main()
   solar_system.momentumHistory.push_back(initMomentum);
 
   double dt = 3600.0;
-  double scale = 450.0 / 4.515e12;
+  double scale = 400.0 / 4.515e12;
 
-  sf::RenderWindow window(sf::VideoMode(1000, 1000), "N-Body Simulation");
-  sf::RectangleShape fadeRectangle(sf::Vector2f(800.f, 800.f));
+  sf::RenderWindow window(sf::VideoMode(900, 900), "N-Body Simulation");
+  window.setPosition(sf::Vector2i(50, 50));
+  sf::RectangleShape fadeRectangle(sf::Vector2f(900.f, 900.f));
   fadeRectangle.setFillColor(sf::Color(0, 0, 0, 10)); // L'ultimo valore '10' è la trasparenza (alfa)
 
   std::vector<sf::Color> palette = {
@@ -44,7 +47,21 @@ int main()
       sf::Color::Yellow,
       sf::Color::Magenta,
       sf::Color::Cyan
-  };
+    };
+
+  /*Cose per la legenda:
+  sf::Font font;
+  if (!font.loadFromFile("font.ttf"))
+  {
+    std::cerr << "Errore: impossibile caricare il font.ttf!\n";
+    // Puoi anche decidere di fare return EXIT_FAILURE; qui se il font è obbligatorio
+  }
+  sf::Text legendText;
+  legendText.setFont(font);
+  legendText.setCharacterSize(20);           // Dimensione del carattere in pixel
+  legendText.setFillColor(sf::Color::White); // Colore del testo
+  legendText.setPosition(10.f, 10.f);        // Posizione in alto a sinistra (x, y)
+  */
 
   while (window.isOpen())
   {
@@ -65,20 +82,46 @@ int main()
     {
       auto &body = solar_system.bodies[i];
       sf::Color bodyColor = palette[i % palette.size()];
-      
+
       sf::CircleShape circle(6.f); // raggio grafico fisso
       circle.setFillColor(bodyColor);
       circle.setOrigin(6.f, 6.f); // centra il cerchio sul punto
 
-      float screenX = 500 + body.position.x * scale;
-      float screenY = 500 + body.position.y * scale;
+      float screenX = 450 + body.position.x * scale;
+      float screenY = 450 + body.position.y * scale;
       circle.setPosition(screenX, screenY);
 
       window.draw(circle);
     }
 
+    // LEGENDA:
+    /*double currentEnergy = solar_system.consEnergy();
+    double currentMomentum = solar_system.consMomentum().module(solar_system.consMomentum());
+    double currentAngMomentum = solar_system.consAngularMomentum();
+
+    // Formatta il testo in modo pulito (notazione scientifica per numeri molto grandi/piccoli)
+    std::ostringstream oss;
+    oss << std::scientific << std::setprecision(4); // 4 cifre decimali
+    oss << "Energia Meccanica: " << currentEnergy << " J\n";
+    oss << "Quantita' di Moto: " << currentMomentum << " kg*m/s\n";
+    oss << "Momento Angolare:  " << currentAngMomentum << " kg*m^2/s";
+
+    // Assegna la stringa creata al testo e disegnalo
+    legendText.setString(oss.str()); */
+
+    // Sfondo legenda
+    /*
+    sf::RectangleShape legendBackground(sf::Vector2f(320.f, 110.f)); // Larghezza e altezza del box
+    legendBackground.setFillColor(sf::Color::Yellow);          // Nero con trasparenza
+    legendBackground.setPosition(5.f, 5.f);
+    window.draw(legendBackground);
+    */
+
+    //window.draw(legendText);
+
     window.display();
   }
+  //Cout vecchi, da capire cosa tenere e cosa no:
   /*for (int i = 0; i < n_steps; ++i) Questo ciclo senza sfml NON eliminiamolo che poi vediamo come implementare i cout.
   {
     solar_system.step(dt);

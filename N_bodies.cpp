@@ -175,7 +175,7 @@ void Simulation::step(double dt)
                          bodies.end());
         }
     }
-    if (totalMass() != totalMassUnmerged) //Questo if si attiva solo se 3 o più corpi si toccano nello stesso momento, e l'algoritmo di "trasferimento massa" si romperebbe.
+    if (totalMass() != totalMassUnmerged) // Questo if si attiva solo se 3 o più corpi si toccano nello stesso momento, e l'algoritmo di "trasferimento massa" si romperebbe.
     {
         throw std::runtime_error("Ci sono state delle collisioni con più di due corpi in contemporanea, non calcolabili da questo programma.");
     }
