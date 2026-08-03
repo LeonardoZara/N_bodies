@@ -5,6 +5,8 @@ Da fare:
 - Punti di Lagrange
 - Test
 - Scrivere il codice in modo avanzato come piace a battibass.
+
+
 Facoltativo se riusciamo:
 - Grandezze dei bodies nella grafica. Meglio usare scala logaritmica sennò il sole è enorme e i pianeti non si vedono.
 - Impostare la possibilità di zoomare e dezoomare nella finestra grafica. (dovrebbe essere facile)
