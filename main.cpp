@@ -3,6 +3,8 @@
 #include <SFML/Graphics.hpp>
 #include <sstream>
 #include <iomanip>
+#include <cmath>
+#include <deque>
 #include "N_bodies.hpp"
 
 int main()
@@ -33,12 +35,17 @@ int main()
   solar_system.momentumHistory.push_back(initMomentum);
 
   double dt = 3600.0;
-  double scale = 400.0 / 4.515e12;
+  double scale = 360.0 / 4.515e12;
 
-  sf::RenderWindow window(sf::VideoMode(900, 900), "N-Body Simulation");
+  sf::RenderWindow window(sf::VideoMode(800, 800), "N-Body Simulation");
   window.setPosition(sf::Vector2i(50, 50));
-  sf::RectangleShape fadeRectangle(sf::Vector2f(900.f, 900.f));
-  fadeRectangle.setFillColor(sf::Color(0, 0, 0, 10)); // L'ultimo valore '10' è la trasparenza (alfa)
+
+  //qui sarebbe per scie con la trasparenza, ma ora è con il vector
+  //sf::RectangleShape fadeRectangle(sf::Vector2f(800.f, 800.f));
+  //fadeRectangle.setFillColor(sf::Color(0, 0, 0, 7)); // L'ultimo valore '10' è la trasparenza (alfa)
+
+  // roba per lo zoom
+  sf::View view = window.getDefaultView();
 
   std::vector<sf::Color> palette = {
       sf::Color::Red,
@@ -46,8 +53,7 @@ int main()
       sf::Color::Blue,
       sf::Color::Yellow,
       sf::Color::Magenta,
-      sf::Color::Cyan
-    };
+      sf::Color::Cyan};
 
   /*Cose per la legenda:
   sf::Font font;
@@ -63,32 +69,116 @@ int main()
   legendText.setPosition(10.f, 10.f);        // Posizione in alto a sinistra (x, y)
   */
 
+  //aggiustare le scie per lo zoom: le facciamo con l'array invece che il fade rectangle
+  const size_t MAX_TRAIL_LENGTH = 1000; // Lunghezza della scia (numero di punti memorizzati)
+  std::vector<std::deque<sf::Vector2f>> trails(solar_system.bodies.size());
+
   while (window.isOpen())
   {
     sf::Event event;
     while (window.pollEvent(event))
     {
       if (event.type == sf::Event::Closed)
+      {
         window.close();
+      }
+
+      if (event.type == sf::Event::MouseWheelScrolled)
+      {
+        if (event.mouseWheelScroll.delta > 0)
+        {
+          scale *= 1.3; // zoom in
+        }
+        else
+        {
+          scale /= 1.3; // zoom out
+        }
+      }
     }
-    for (int k = 0; k < 5; k++)
+
+    for (int k = 0; k < 15; k++)
     {
       solar_system.step(dt);
     }
-    // window.clear(sf::Color::Black);
-    window.draw(fadeRectangle);
+    window.clear(sf::Color::Black);
+    //window.draw(fadeRectangle); in questo caso le scie non si aggiusterebbero con lo zoom
 
     for (size_t i = 0; i < solar_system.bodies.size(); ++i)
     {
       auto &body = solar_system.bodies[i];
       sf::Color bodyColor = palette[i % palette.size()];
 
-      sf::CircleShape circle(6.f); // raggio grafico fisso
-      circle.setFillColor(bodyColor);
-      circle.setOrigin(6.f, 6.f); // centra il cerchio sul punto
 
-      float screenX = 450 + body.position.x * scale;
-      float screenY = 450 + body.position.y * scale;
+      //qui calcoliamo le scie
+      // --- 1. GESTIONE DELLA SCIA ---
+      // Salviamo la posizione FISICA (non i pixel) nella coda
+      trails[i].push_back(sf::Vector2f(body.position.x, body.position.y));
+      if (trails[i].size() > MAX_TRAIL_LENGTH) {
+          trails[i].pop_front();
+      }
+
+      // Disegniamo la scia applicando la variabile 'scale' in tempo reale (perfetto per lo zoom)
+      sf::VertexArray trailLine(sf::LineStrip, trails[i].size());
+      for (size_t j = 0; j < trails[i].size(); ++j)
+      {
+          float trailScreenX = 400 + trails[i][j].x * scale;
+          float trailScreenY = 400 + trails[i][j].y * scale;
+          
+          trailLine[j].position = sf::Vector2f(trailScreenX, trailScreenY);
+          
+          // Trasparenza progressiva: più il punto è vecchio, più è trasparente
+          sf::Uint8 alpha = static_cast<sf::Uint8>((255 * j) / trails[i].size()); 
+          trailLine[j].color = sf::Color(bodyColor.r, bodyColor.g, bodyColor.b, alpha); 
+      }
+      window.draw(trailLine);
+
+      //qui calcoliamo il raggio logaritmico per la grafica
+      // 1. Definisci i limiti di massa (basati sui tuoi dati del Sistema Solare)
+      const double m_min = 3.3e23;   // Massa di Mercurio (limite inferiore)
+      const double m_max = 1.989e30; // Massa del Sole (limite superiore)
+      
+      // 2. Definisci i limiti visivi in pixel
+      const float r_min = 2.0f;  // Grandezza del "puntino" piccolo
+      const float r_max = 10.0f; // Grandezza del cerchio massimo (es. Sole o Giove)
+
+      // 3. Ottieni la massa del corpo corrente 
+      // (nota: ho usato getMass() basandomi sul tuo codice commentato. 
+      // Se nella tua struct è una variabile pubblica, usa semplicemente body.massa o simile)
+      double currentMass = body.getMass(); 
+      float finalRadius = r_min;
+
+      // 4. Applica la logica delle soglie e del logaritmo
+      if (currentMass <= m_min) 
+      {
+          // Sotto o uguale al minimo: rimane un piccolo punto
+          finalRadius = r_min;
+      } 
+      else if (currentMass >= m_max) 
+      {
+          // Sopra o uguale al massimo: raggiunge la grandezza massima
+          finalRadius = r_max;
+      } 
+      else 
+      {
+          // Interpolazione logaritmica: calcoliamo quanto siamo distanti (in percentuale) 
+          // tra l'esponente di Mercurio e quello del Sole.
+          double logMass = std::log10(currentMass);
+          double logMin  = std::log10(m_min);
+          double logMax  = std::log10(m_max);
+          
+          // t sarà un valore da 0.0 (vicino a m_min) a 1.0 (vicino a m_max)
+          double t = (logMass - logMin) / (logMax - logMin); 
+          
+          // Mappiamo la percentuale sui pixel
+          finalRadius = r_min + static_cast<float>(t * (r_max - r_min));
+      }
+
+      sf::CircleShape circle(finalRadius); // se vogliamo rimetterlo fisso basta mettere (6.f)
+      circle.setFillColor(bodyColor);
+      circle.setOrigin(finalRadius, finalRadius); // centra il cerchio sul punto
+
+      float screenX = 400 + body.position.x * scale;
+      float screenY = 400 + body.position.y * scale;
       circle.setPosition(screenX, screenY);
 
       window.draw(circle);
@@ -117,11 +207,11 @@ int main()
     window.draw(legendBackground);
     */
 
-    //window.draw(legendText);
+    // window.draw(legendText);
 
     window.display();
   }
-  //Cout vecchi, da capire cosa tenere e cosa no:
+  // Cout vecchi, da capire cosa tenere e cosa no:
   /*for (int i = 0; i < n_steps; ++i) Questo ciclo senza sfml NON eliminiamolo che poi vediamo come implementare i cout.
   {
     solar_system.step(dt);
