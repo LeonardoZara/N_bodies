@@ -20,6 +20,21 @@ int main()
     std::cerr << "Errore nel caricamento dei corpi: " << e.what() << '\n';
     return EXIT_FAILURE;
   }
+
+  bool viewLagrange;
+  if(solar_system.bodies.size()==2){
+    std::cout<<"Vuoi visualizzare a schermo i punti di Lagrange del sistema? Rispondi 0 per non visualizzarli, 1 per visualizzarli." <<'\n';
+    std::cin>>viewLagrange;
+    if(viewLagrange==1){
+      solar_system.bodies.emplace_back(1, solar_system.lagrange(3).x, solar_system.lagrange(3).y, 0., 0., 1);
+      solar_system.bodies.emplace_back(1, solar_system.lagrange(4).x, solar_system.lagrange(4).y, 0., 0., 1);
+    } else {
+      if(viewLagrange!=0){
+        std::cerr << "Inserire 0 oppure 1." << '\n';
+      }
+    }
+  }
+  
   solar_system.initAccelerations();
 
   double initEnergy = solar_system.consEnergy();
