@@ -203,3 +203,23 @@ void Simulation::step(double dt)
     angularMomentumHistory.push_back(consAngularMomentum());
     momentumHistory.push_back(consMomentum().module(consMomentum()));
 }
+
+std::vector<Vicktor> Simulation::lagrange(){
+    //bodies[0] e bodies[1] devono giacere sull'asse x, e bodies[0] deve avere massa maggiore.
+    std::vector<Vicktor> lagPoints(5);
+    double distance=bodies[0].position.module(bodies[0].position.subtract(bodies[0].position, bodies[1].position));
+    double x1{-bodies[1].getMass()*distance/(bodies[0].getMass()+bodies[1].getMass())};
+    double x2{bodies[0].getMass()*distance/(bodies[0].getMass()+bodies[1].getMass())};
+    double omega {sqrt(G*(bodies[0].getMass()+bodies[1].getMass())/(pow(distance, 3)))};
+    //L4=
+    lagPoints[3].x=x1+x2/2;
+    lagPoints[3].y=sqrt(3)*distance/2;
+    //L5=
+    lagPoints[4].x=x1+x2/2;
+    lagPoints[4].y=-sqrt(3)*distance/2;
+    //per calcolare L1, L2, L3 uso metodo di Newton-Raphson per stimare le soluzioni delle equazioni polinomiali di quinto grado.
+}
+
+double equationSolver(double ){
+
+}

@@ -6,6 +6,7 @@
 #include <cmath>
 #include <deque>
 #include "N_bodies.hpp"
+#include "lagrange.hpp"
 
 int main()
 {
