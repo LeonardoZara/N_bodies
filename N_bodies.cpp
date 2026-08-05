@@ -205,7 +205,8 @@ void Simulation::step(double dt)
     momentumHistory.push_back(consMomentum().module(consMomentum()));
 }
 
-std::vector<Vicktor> Simulation::lagrange()
+Vicktor Simulation::lagrange(int i) 
+//Questa funzione restituisce i punti di lagrange INIZIALI del sistema di due corpi inizialmente allineati sull'asse x.
 {
     // bodies[0] e bodies[1] devono giacere sull'asse x, e bodies[0] deve avere massa maggiore.
     std::vector<Vicktor> lagPoints(5);
@@ -221,5 +222,5 @@ std::vector<Vicktor> Simulation::lagrange()
     lagPoints[4].y = -sqrt(3) * distance / 2;
     // calcolare L1, L2, L3 è molto difficile, richiede algoritmo di stima soluzioni di equazioni di 5° grado. Vediamo se farlo oppuure no.
 
-    return lagPoints;
+    return lagPoints[i].sum(lagPoints[i], centreOfMass());
 }
