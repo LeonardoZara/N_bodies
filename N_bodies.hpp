@@ -54,6 +54,6 @@ public:
     Vicktor consMomentum();
     void initAccelerations();
     void step(double dt);
-    std::vector<Vicktor> lagrange();
+    Vicktor lagrange();
 };
 #endif
