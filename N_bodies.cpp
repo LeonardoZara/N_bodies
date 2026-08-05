@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <type_traits>
 #include <algorithm>
+#include <functional>
 #include "vicktor.hpp"
 #include "N_bodies.hpp"
 
@@ -202,4 +203,23 @@ void Simulation::step(double dt)
     energiesHistory.push_back(consEnergy());
     angularMomentumHistory.push_back(consAngularMomentum());
     momentumHistory.push_back(consMomentum().module(consMomentum()));
+}
+
+std::vector<Vicktor> Simulation::lagrange()
+{
+    // bodies[0] e bodies[1] devono giacere sull'asse x, e bodies[0] deve avere massa maggiore.
+    std::vector<Vicktor> lagPoints(5);
+    double distance = bodies[0].position.module(bodies[0].position.subtract(bodies[0].position, bodies[1].position));
+    double x1{-bodies[1].getMass() * distance / (bodies[0].getMass() + bodies[1].getMass())};
+    double x2{bodies[0].getMass() * distance / (bodies[0].getMass() + bodies[1].getMass())};
+    double omega{sqrt(G * (bodies[0].getMass() + bodies[1].getMass()) / (pow(distance, 3)))};
+    // L4=
+    lagPoints[3].x = x1 + x2 / 2;
+    lagPoints[3].y = sqrt(3) * distance / 2;
+    // L5=
+    lagPoints[4].x = x1 + x2 / 2;
+    lagPoints[4].y = -sqrt(3) * distance / 2;
+    // calcolare L1, L2, L3 è molto difficile, richiede algoritmo di stima soluzioni di equazioni di 5° grado. Vediamo se farlo oppuure no.
+
+    return lagPoints;
 }
