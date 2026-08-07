@@ -54,9 +54,6 @@ int main()
   std::cout << "Quantità di moto iniziale: " << initMomentum << '\n';
   solar_system.momentumHistory.push_back(initMomentum);
 
-  double dt = 3600.0;
-  double scale = 360.0 / 4.515e12;
-
   sf::RenderWindow window(sf::VideoMode(800, 800), "N-Body Simulation");
   window.setPosition(sf::Vector2i(50, 50));
 
@@ -80,13 +77,26 @@ int main()
   }
   sf::Text legendText;
   legendText.setFont(font);
-  legendText.setCharacterSize(20);           // Dimensione del carattere in pixel
+  legendText.setCharacterSize(15);           // Dimensione del carattere in pixel
   legendText.setFillColor(sf::Color::White); // Colore del testo
   legendText.setPosition(10.f, 10.f);        // Posizione in alto a sinistra (x, y)
+  sf::Text instructionsText;
+  instructionsText.setFont(font);
+  instructionsText.setCharacterSize(15);
+  instructionsText.setFillColor(sf::Color::White);
+  instructionsText.setPosition(10.f, 650.f);
 
   // aggiustare le scie per lo zoom: le facciamo con l'array invece che il fade rectangle
   const size_t MAX_TRAIL_LENGTH = 1000; // Lunghezza della scia (numero di punti memorizzati)
   std::vector<std::deque<sf::Vector2f>> trails(solar_system.bodies.size());
+
+  double dt = 3600.0;
+  const double dtMin = 60.0;
+  const double dtMax = 21600.0;
+  double scale = 360.0 / 4.515e12;
+  int subSteps = 15;
+  const int minSubSteps = 1;
+  const int maxSubSteps = 30;
 
   while (window.isOpen())
   {
@@ -109,9 +119,31 @@ int main()
           scale /= 1.3; // zoom out
         }
       }
+      if (event.type == sf::Event::KeyPressed)
+      {
+        if (event.key.code == sf::Keyboard::Up)
+        {
+          subSteps = std::min(subSteps + 1, maxSubSteps);
+        }
+        if (event.key.code == sf::Keyboard::Down)
+        {
+          subSteps = std::max(subSteps - 1, minSubSteps);
+        }
+      }
+      if (event.type == sf::Event::KeyPressed)
+      {
+        if (event.key.code == sf::Keyboard::Right)
+        {
+          dt = std::min(dt * 1.2, dtMax);
+        }
+        if (event.key.code == sf::Keyboard::Left)
+        {
+          dt = std::max(dt / 1.2, dtMin);
+        }
+      }
     }
 
-    for (int k = 0; k < 15; k++)
+    for (int k = 0; k < subSteps; k++)
     {
       solar_system.step(dt);
     }
@@ -204,15 +236,25 @@ int main()
 
     // Formatta il testo in modo pulito (notazione scientifica per numeri molto grandi/piccoli)
     std::ostringstream oss;
-    oss << std::scientific << std::setprecision(4); // 4 cifre decimali
-    oss << "Energia Meccanica: " << currentEnergy << " J\n";
-    oss << "Quantita' di Moto: " << currentMomentum << " kg*m/s\n";
-    oss << "Momento Angolare:  " << currentAngMomentum << " kg*m^2/s";
+    oss << std::scientific << std::setprecision(6); // 4 cifre decimali
+    oss << "Mechanical Energy: " << currentEnergy << " J\n";
+    oss << "Momentum: " << currentMomentum << " kg*m/s\n";
+    oss << "Angular Momentum:  " << currentAngMomentum << " kg*m^2/s";
 
     // Assegna la stringa creata al testo e disegnalo
     legendText.setString(oss.str());
 
     window.draw(legendText);
+
+    std::ostringstream oss2;
+    oss2 << "To change the speed of the simulation press Up/Down arrows." << '\n';
+    oss2 << "Speed: " << subSteps << " iterations per frame" << '\n';
+    oss2 << "To change the dt (time between each calculated iteration) press Left/Right arrows." << '\n';
+    oss2 << "dt: " << dt/60 << " minutes" << '\n';
+
+    instructionsText.setString(oss2.str());
+
+    window.draw(instructionsText);
 
     window.display();
   }
