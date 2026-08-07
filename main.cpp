@@ -23,7 +23,7 @@ int main()
 
   bool viewLagrange;
   if(solar_system.bodies.size()==2){
-    std::cout<<"Vuoi visualizzare a schermo i punti di Lagrange del sistema? Scrivi 0 per non visualizzarli, 1 per visualizzarli." <<'\n';
+    std::cout<<"Vuoi visualizzare a schermo i punti di Lagrange del sistema? Rispondi 0 per non visualizzarli, 1 per visualizzarli." <<'\n';
     std::cin>>viewLagrange;
     if(viewLagrange==1){
       solar_system.bodies.emplace_back(1, solar_system.lagrange(3).x, solar_system.lagrange(3).y, 0., 0., 1);
@@ -34,7 +34,7 @@ int main()
       }
     }
   }
-
+  
   solar_system.initAccelerations();
 
   double initEnergy = solar_system.consEnergy();
