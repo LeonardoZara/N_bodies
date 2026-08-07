@@ -70,7 +70,7 @@ int main()
       sf::Color::Magenta,
       sf::Color::Cyan};
 
-  /*Cose per la legenda:
+  Cose per la legenda:
   sf::Font font;
   if (!font.loadFromFile("font.ttf"))
   {
@@ -82,7 +82,6 @@ int main()
   legendText.setCharacterSize(20);           // Dimensione del carattere in pixel
   legendText.setFillColor(sf::Color::White); // Colore del testo
   legendText.setPosition(10.f, 10.f);        // Posizione in alto a sinistra (x, y)
-  */
 
   //aggiustare le scie per lo zoom: le facciamo con l'array invece che il fade rectangle
   const size_t MAX_TRAIL_LENGTH = 1000; // Lunghezza della scia (numero di punti memorizzati)
@@ -200,7 +199,7 @@ int main()
     }
 
     // LEGENDA:
-    /*double currentEnergy = solar_system.consEnergy();
+    double currentEnergy = solar_system.consEnergy();
     double currentMomentum = solar_system.consMomentum().module(solar_system.consMomentum());
     double currentAngMomentum = solar_system.consAngularMomentum();
 
@@ -212,17 +211,9 @@ int main()
     oss << "Momento Angolare:  " << currentAngMomentum << " kg*m^2/s";
 
     // Assegna la stringa creata al testo e disegnalo
-    legendText.setString(oss.str()); */
+    legendText.setString(oss.str());
 
-    // Sfondo legenda
-    /*
-    sf::RectangleShape legendBackground(sf::Vector2f(320.f, 110.f)); // Larghezza e altezza del box
-    legendBackground.setFillColor(sf::Color::Yellow);          // Nero con trasparenza
-    legendBackground.setPosition(5.f, 5.f);
-    window.draw(legendBackground);
-    */
-
-    // window.draw(legendText);
+    window.draw(legendText);
 
     window.display();
   }
