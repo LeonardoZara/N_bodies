@@ -6,7 +6,6 @@
 #include <cmath>
 #include <deque>
 #include "N_bodies.hpp"
-#include "lagrange.hpp"
 
 int main()
 {
@@ -21,6 +20,21 @@ int main()
     std::cerr << "Errore nel caricamento dei corpi: " << e.what() << '\n';
     return EXIT_FAILURE;
   }
+
+  bool viewLagrange;
+  if(solar_system.bodies.size()==2){
+    std::cout<<"Vuoi visualizzare a schermo i punti di Lagrange del sistema? Scrivi 0 per non visualizzarli, 1 per visualizzarli." <<'\n';
+    std::cin>>viewLagrange;
+    if(viewLagrange==1){
+      solar_system.bodies.emplace_back(1, solar_system.lagrange(3).x, solar_system.lagrange(3).y, 0., 0., 1);
+      solar_system.bodies.emplace_back(1, solar_system.lagrange(4).x, solar_system.lagrange(4).y, 0., 0., 1);
+    } else {
+      if(viewLagrange!=0){
+        std::cerr << "Inserire 0 oppure 1." << '\n';
+      }
+    }
+  }
+
   solar_system.initAccelerations();
 
   double initEnergy = solar_system.consEnergy();
@@ -56,7 +70,7 @@ int main()
       sf::Color::Magenta,
       sf::Color::Cyan};
 
-  /*Cose per la legenda:
+  //Cose per la legenda:
   sf::Font font;
   if (!font.loadFromFile("font.ttf"))
   {
@@ -68,7 +82,7 @@ int main()
   legendText.setCharacterSize(20);           // Dimensione del carattere in pixel
   legendText.setFillColor(sf::Color::White); // Colore del testo
   legendText.setPosition(10.f, 10.f);        // Posizione in alto a sinistra (x, y)
-  */
+  
 
   //aggiustare le scie per lo zoom: le facciamo con l'array invece che il fade rectangle
   const size_t MAX_TRAIL_LENGTH = 1000; // Lunghezza della scia (numero di punti memorizzati)
@@ -186,7 +200,7 @@ int main()
     }
 
     // LEGENDA:
-    /*double currentEnergy = solar_system.consEnergy();
+    double currentEnergy = solar_system.consEnergy();
     double currentMomentum = solar_system.consMomentum().module(solar_system.consMomentum());
     double currentAngMomentum = solar_system.consAngularMomentum();
 
@@ -198,17 +212,9 @@ int main()
     oss << "Momento Angolare:  " << currentAngMomentum << " kg*m^2/s";
 
     // Assegna la stringa creata al testo e disegnalo
-    legendText.setString(oss.str()); */
+    legendText.setString(oss.str());
 
-    // Sfondo legenda
-    /*
-    sf::RectangleShape legendBackground(sf::Vector2f(320.f, 110.f)); // Larghezza e altezza del box
-    legendBackground.setFillColor(sf::Color::Yellow);          // Nero con trasparenza
-    legendBackground.setPosition(5.f, 5.f);
-    window.draw(legendBackground);
-    */
-
-    // window.draw(legendText);
+    window.draw(legendText);
 
     window.display();
   }
