@@ -8,12 +8,12 @@
 
 class Planet
 {
+    double mass;
+    double radius;
 public:
     Vicktor position;
     Vicktor velocity;
     Vicktor acceleration;
-    double mass;
-    double radius;
     Planet(double m, double posx, double posy, double velx, double vely, double r, double accex = 0.0, double accey = 0.0)
         : mass(m), radius(r)
     {
@@ -33,6 +33,14 @@ public:
     {
         return radius;
     }
+    void setMass(double newMass)
+    {
+        mass = newMass;
+    }
+    void setRadius(double newRadius)
+    {
+        radius = newRadius;
+    }
 };
 
 struct MinMaxTracker
@@ -50,7 +58,7 @@ struct MinMaxTracker
 class Simulation
 {
     static constexpr double G{6.6743e-11};
-    
+
 public:
     std::vector<Planet> bodies;
     MinMaxTracker energyRange;
