@@ -9,11 +9,11 @@
 
 int main()
 {
-  Simulation solar_system;
+  Simulation sim;
 
   try
   {
-    solar_system.loadFromFile("dati.txt");
+    sim.loadFromFile("dati.txt");
   }
   catch (const std::exception &e)
   {
@@ -22,14 +22,14 @@ int main()
   }
 
   bool viewLagrange;
-  if (solar_system.bodies.size() == 2)
+  if (sim.bodies.size() == 2)
   {
     std::cout << "Vuoi visualizzare a schermo i punti di Lagrange del sistema? Rispondi 0 per non visualizzarli, 1 per visualizzarli." << '\n';
     std::cin >> viewLagrange;
     if (viewLagrange == 1)
     {
-      solar_system.bodies.emplace_back(1, solar_system.lagrange(3).x, solar_system.lagrange(3).y, 0., 0., 1);
-      solar_system.bodies.emplace_back(1, solar_system.lagrange(4).x, solar_system.lagrange(4).y, 0., 0., 1);
+      sim.bodies.emplace_back(1, sim.lagrange(3).x, sim.lagrange(3).y, 0., 0., 1);
+      sim.bodies.emplace_back(1, sim.lagrange(4).x, sim.lagrange(4).y, 0., 0., 1);
     }
     else
     {
@@ -40,19 +40,19 @@ int main()
     }
   }
 
-  solar_system.initAccelerations();
+  sim.initAccelerations();
 
-  double initEnergy = solar_system.consEnergy();
+  double initEnergy = sim.consEnergy();
   std::cout << "Energia meccanica iniziale: " << initEnergy << '\n';
-  solar_system.energiesHistory.push_back(initEnergy);
+  sim.energyRange.update(initEnergy);
 
-  double initAngularMomentum = solar_system.consAngularMomentum();
+  double initAngularMomentum = sim.consAngularMomentum();
   std::cout << "Momento angolare iniziale: " << initAngularMomentum << '\n';
-  solar_system.angularMomentumHistory.push_back(initAngularMomentum);
+  sim.angularMomentumRange.update(initAngularMomentum);
 
-  double initMomentum = solar_system.consMomentum().module();
+  double initMomentum = sim.consMomentum().module();
   std::cout << "Quantità di moto iniziale: " << initMomentum << '\n';
-  solar_system.momentumHistory.push_back(initMomentum);
+  sim.momentumRange.update(initMomentum);
 
   sf::RenderWindow window(sf::VideoMode(800, 800), "N-Body Simulation");
   window.setPosition(sf::Vector2i(50, 50));
@@ -88,7 +88,7 @@ int main()
 
   // aggiustare le scie per lo zoom: le facciamo con l'array invece che il fade rectangle
   const size_t MAX_TRAIL_LENGTH = 1000; // Lunghezza della scia (numero di punti memorizzati)
-  std::vector<std::deque<sf::Vector2f>> trails(solar_system.bodies.size());
+  std::vector<std::deque<sf::Vector2f>> trails(sim.bodies.size());
 
   double dt = 3600.0;
   const double dtMin = 60.0;
@@ -145,13 +145,13 @@ int main()
 
     for (int k = 0; k < subSteps; k++)
     {
-      solar_system.step(dt);
+      sim.step(dt);
     }
     window.clear(sf::Color::Black);
 
-    for (size_t i = 0; i < solar_system.bodies.size(); ++i)
+    for (size_t i = 0; i < sim.bodies.size(); ++i)
     {
-      auto &body = solar_system.bodies[i];
+      auto &body = sim.bodies[i];
       sf::Color bodyColor = palette[i % palette.size()];
 
       // qui calcoliamo le scie
@@ -230,16 +230,16 @@ int main()
     }
 
     // LEGENDA:
-    double currentEnergy = solar_system.consEnergy();
-    double currentMomentum = solar_system.consMomentum().module();
-    double currentAngMomentum = solar_system.consAngularMomentum();
+    double currentEnergy = sim.consEnergy();
+    double currentMomentum = sim.consMomentum().module();
+    double currentAngMomentum = sim.consAngularMomentum();
 
     // Formatta il testo in modo pulito (notazione scientifica per numeri molto grandi/piccoli)
     std::ostringstream oss;
-    oss << std::scientific << std::setprecision(6); // 4 cifre decimali
-    oss << "Mechanical Energy: " << currentEnergy << " J\n";
-    oss << "Momentum: " << currentMomentum << " kg*m/s\n";
-    oss << "Angular Momentum:  " << currentAngMomentum << " kg*m^2/s";
+    oss << std::scientific << std::setprecision(8); // 8 cifre decimali
+    oss << "Current Mechanical Energy: " << currentEnergy << " J\n";
+    oss << "Current Momentum: " << currentMomentum << " kg*m/s\n";
+    oss << "Current Angular Momentum:  " << currentAngMomentum << " kg*m^2/s";
 
     // Assegna la stringa creata al testo e disegnalo
     legendText.setString(oss.str());
@@ -259,15 +259,7 @@ int main()
     window.display();
   }
 
-  double maxEnergy = *std::max_element(std::begin(solar_system.energiesHistory), std::end(solar_system.energiesHistory));
-  double minEnergy = *std::min_element(std::begin(solar_system.energiesHistory), std::end(solar_system.energiesHistory));
-  std::cout << "L'energia oscilla tra " << maxEnergy << " e " << minEnergy << '\n';
-
-  double maxAngularMomentum = *std::max_element(std::begin(solar_system.angularMomentumHistory), std::end(solar_system.angularMomentumHistory));
-  double minAngularMomentum = *std::min_element(std::begin(solar_system.angularMomentumHistory), std::end(solar_system.angularMomentumHistory));
-  std::cout << "Il momento angolare oscilla tra " << maxAngularMomentum << " e " << minAngularMomentum << '\n';
-
-  double maxMomentum = *std::max_element(std::begin(solar_system.momentumHistory), std::end(solar_system.momentumHistory));
-  double minMomentum = *std::min_element(std::begin(solar_system.momentumHistory), std::end(solar_system.momentumHistory));
-  std::cout << "la quantità di moto oscilla tra " << maxMomentum << " e " << minMomentum << '\n';
+  std::cout << "L'energia oscilla tra " << sim.energyRange.max << " e " << sim.energyRange.min << '\n';
+  std::cout << "Il momento angolare oscilla tra " << sim.angularMomentumRange.max << " e " << sim.angularMomentumRange.min << '\n';
+  std::cout << "La quantità di moto oscilla tra " << sim.momentumRange.max << " e " << sim.momentumRange.min << '\n';
 }

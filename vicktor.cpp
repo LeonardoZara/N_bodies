@@ -57,4 +57,4 @@ double Vicktor::module() const
 }
 
 // comodo anche fuori dalla classe, per scrivere n * v
-inline Vicktor operator*(double n, const Vicktor &v) { return v * n; }
+//inline Vicktor operator*(double n, const Vicktor &v) { return v * n; }

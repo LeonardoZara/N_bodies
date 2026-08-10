@@ -22,11 +22,10 @@ struct Vicktor
     Vicktor operator-(const Vicktor &q) const; 
     Vicktor operator*(double n) const;
     Vicktor &operator+=(const Vicktor &q);
-
     double module() const;
 };
 
-inline Vicktor operator*(double n, const Vicktor &v);
+//inline Vicktor operator*(double n, const Vicktor &v);
 
 
 #endif

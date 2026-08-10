@@ -36,25 +36,36 @@ public:
     }
 };
 
+struct MinMaxTracker
+{
+    double min{std::numeric_limits<double>::infinity()};
+    double max{-std::numeric_limits<double>::infinity()};
+    void update(double v)
+    {
+        min = std::min(min, v);
+        max = std::max(max, v);
+    }
+};
+
 class Simulation
 {
-    double const G{6.6743e-11};
-    double const epsilon{1e-12};
+    static constexpr double G{6.6743e-11};
+    
 
 public:
     std::vector<Planet> bodies;
-    std::vector<double> energiesHistory;
-    std::vector<double> angularMomentumHistory;
-    std::vector<double> momentumHistory;
+    MinMaxTracker energyRange;
+    MinMaxTracker angularMomentumRange;
+    MinMaxTracker momentumRange;
     void loadFromFile(const std::string &filename);
-    double consEnergy();
-    Vicktor centreOfMass();
-    double totalMass();
-    double consAngularMomentum();
-    Vicktor consMomentum();
+    double consEnergy() const;
+    Vicktor centreOfMass() const;
+    double totalMass() const;
+    double consAngularMomentum() const;
+    Vicktor consMomentum() const;
     void initAccelerations();
     void step(double dt);
-    Vicktor lagrange(int i);
+    Vicktor lagrange(int i) const;
 };
 
 #endif

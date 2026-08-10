@@ -5,6 +5,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <type_traits>
+#include <numeric>
 #include <algorithm>
 #include <functional>
 #include "vicktor.hpp"
@@ -25,28 +26,23 @@ void Simulation::loadFromFile(const std::string &filename)
         {
             continue;
         }
-
         std::istringstream iss(line);
         double m, posx, posy, velx, vely, radius;
         if (!(iss >> m >> posx >> posy >> velx >> vely >> radius))
         {
-            throw std::runtime_error("Riga malformata nel file dati: " + line);
-        }
-        if ((std::is_same<decltype(m, posx, posy, velx, vely, radius), double>::value))
-        {
-            throw std::runtime_error("I dati del file input devono essere dei double." + line);
+            throw std::invalid_argument("Riga malformata nel file dati: " + line);
         }
         if (m <= 0)
         {
-            throw std::runtime_error("La massa non può essere negativa." + line);
+            throw std::invalid_argument("La massa non può essere negativa." + line);
         }
         if (radius <= 0)
         {
-            throw std::runtime_error("Il raggio non può essere negativo." + line);
+            throw std::invalid_argument("Il raggio non può essere negativo." + line);
         }
-        if (velx >= 3e8 || vely >= 3e8)
+        if (velx >= 3e8 || vely >= 3e8 || velx <= -3e8 || vely <= -3e8)
         {
-            throw std::runtime_error("La velocità dei corpi deve essere minore di quella della luce." + line);
+            throw std::invalid_argument("La velocità dei corpi deve essere minore di quella della luce." + line);
         }
         bodies.emplace_back(m, posx, posy, velx, vely, radius);
     }
@@ -73,7 +69,7 @@ static Vicktor gravAcceleration(const std::vector<Planet> &bodies, size_t i, dou
     return acc;
 }
 
-double Simulation::consEnergy()
+double Simulation::consEnergy() const
 {
     // Conservazione energia:
     double k{0};
@@ -93,7 +89,7 @@ double Simulation::consEnergy()
     return k + u;
 }
 
-Vicktor Simulation::centreOfMass()
+Vicktor Simulation::centreOfMass() const
 {
     Vicktor cm{0, 0};
     Vicktor cmNumerator{0., 0.};
@@ -103,21 +99,18 @@ Vicktor Simulation::centreOfMass()
         cmNumerator = cm + (bodies[i].position * bodies[i].getMass());
         totalMass += bodies[i].getMass();
     }
-    cm = cmNumerator * (1/totalMass);
+    cm = cmNumerator * (1 / totalMass);
     return cm;
 }
 
-double Simulation::totalMass()
+double Simulation::totalMass() const
 {
-    double totalMass{0.};
-    for (size_t i = 0; i < bodies.size(); ++i)
-    {
-        totalMass += bodies[i].getMass();
-    }
-    return totalMass;
+    return std::accumulate(bodies.begin(), bodies.end(), 0.0,
+                           [](double sum, const Planet &p)
+                           { return sum + p.getMass(); });
 }
 
-double Simulation::consAngularMomentum()
+double Simulation::consAngularMomentum() const
 {
     Vicktor cm = centreOfMass();
     double angularMomentum{0};
@@ -128,7 +121,7 @@ double Simulation::consAngularMomentum()
     return angularMomentum;
 }
 
-Vicktor Simulation::consMomentum()
+Vicktor Simulation::consMomentum() const
 {
     Vicktor momentum{0., 0.};
 
@@ -156,26 +149,22 @@ void Simulation::step(double dt)
     {
         for (size_t i = 0; i < j; ++i)
         {
-            if((bodies[i].position-bodies[j].position).module()<=(bodies[i].getRadius() + bodies[j].getRadius()))
+            if ((bodies[i].position - bodies[j].position).module() <= (bodies[i].getRadius() + bodies[j].getRadius()))
             {
-                bodies[j].position = ((bodies[i].position * bodies[i].getMass()) + (bodies[j].position *bodies[j].getMass())) *  (1 / (bodies[i].getMass() + bodies[j].getMass()));
-                bodies[j].velocity = ((bodies[i].velocity * bodies[i].getMass()) + (bodies[j].velocity *bodies[j].getMass())) *  (1 / (bodies[i].getMass() + bodies[j].getMass()));
+                bodies[j].position = ((bodies[i].position * bodies[i].getMass()) + (bodies[j].position * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
+                bodies[j].velocity = ((bodies[i].velocity * bodies[i].getMass()) + (bodies[j].velocity * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
                 bodies[j].mass += bodies[i].mass;
                 bodies[i].mass = 0.;
                 merged = true;
             }
         }
     }
-    for (size_t i = 0; i < bodies.size(); ++i)
-    {
-        if (bodies[i].mass == 0.)
-        {
-            bodies.erase(std::remove_if(bodies.begin(), bodies.end(),
-                                        [](const Planet &p)
-                                        { return p.getMass() == 0.0; }),
-                         bodies.end());
-        }
-    }
+
+    bodies.erase(std::remove_if(bodies.begin(), bodies.end(),
+                                [](const Planet &p)
+                                { return p.getMass() == 0.0; }),
+                 bodies.end());
+
     if (totalMass() != totalMassUnmerged) // Questo if si attiva solo se 3 o più corpi si toccano nello stesso momento, e l'algoritmo di "trasferimento massa" si romperebbe.
     {
         throw std::runtime_error("Ci sono state delle collisioni con più di due corpi in contemporanea, non calcolabili da questo programma.");
@@ -188,23 +177,26 @@ void Simulation::step(double dt)
     // FINE CONTROLLO COLLISIONI
     for (size_t i = 0; i < bodies.size(); ++i) // calcolo delle posizioni ogni dt
     {
-            bodies[i].position = bodies[i].position + (bodies[i].velocity * dt) + (bodies[i].acceleration * (0.5 * dt * dt));
+        bodies[i].position = bodies[i].position + (bodies[i].velocity * dt) + (bodies[i].acceleration * (0.5 * dt * dt));
     }
     for (size_t i = 0; i < bodies.size(); ++i) // calcolo delle velocità e accelerazioni ogni dt
     {
         Vicktor acc_old = bodies[i].acceleration;
         Vicktor acc_new = gravAcceleration(bodies, i, G);
         Vicktor acc_sum = acc_old + acc_new;
-        bodies[i].velocity = bodies[i].velocity + (acc_sum *( 0.5 * dt));
+        bodies[i].velocity = bodies[i].velocity + (acc_sum * (0.5 * dt));
         bodies[i].acceleration = acc_new;
     }
-    energiesHistory.push_back(consEnergy());
-    angularMomentumHistory.push_back(consAngularMomentum());
-    momentumHistory.push_back(consMomentum().module());
+    double e = consEnergy();
+    double L = consAngularMomentum();
+    double p = consMomentum().module();
+    energyRange.update(e);
+    angularMomentumRange.update(L);
+    momentumRange.update(p);
 }
 
-Vicktor Simulation::lagrange(int i) 
-//Questa funzione restituisce i punti di lagrange INIZIALI del sistema di due corpi inizialmente allineati sull'asse x.
+Vicktor Simulation::lagrange(int i) const
+// Questa funzione restituisce i punti di lagrange INIZIALI del sistema di due corpi inizialmente allineati sull'asse x.
 {
     // bodies[0] e bodies[1] devono giacere sull'asse x, e bodies[0] deve avere massa maggiore.
     std::vector<Vicktor> lagPoints(5);
