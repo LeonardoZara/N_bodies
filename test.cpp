@@ -118,8 +118,35 @@ TEST_CASE("Simulation::step - one body moving with constant velocity")
 TEST_CASE("Simulation::step - elliptical orbit")
 {
     Simulation sim;
-    sim.bodies.emplace_back
+    // Sole
+    sim.bodies.emplace_back(1.989e30, 0.0, 0.0, 0.0, -0.154894, 6.96e8);
+    // Pianeta in orbita ellittica
+    sim.bodies.emplace_back(5.972e24, 7.48e10, 0.0, 0.0, 51588.2, 6.371e6);
+    
+    sim.initAccelerations();
 
+    // 1. Salviamo i valori fisici iniziali
+    double initialEnergy = sim.consEnergy();
+    double initialAngMom = sim.consAngularMomentum();
+
+    // 2. Facciamo avanzare la simulazione per un mese (30 giorni)
+    // Usiamo un dt di 3600 secondi (1 ora)
+    double dt = 3600.0;
+    for (int i = 0; i < 24 * 30; ++i)
+    {
+        sim.step(dt);
+    }
+
+    // 3. Calcoliamo i valori fisici finali
+    double finalEnergy = sim.consEnergy();
+    double finalAngMom = sim.consAngularMomentum();
+
+    // 4. Verifichiamo la conservazione (con un margine di tolleranza)
+    // Nota: Lavorando con numeri astronomici giganteschi (es. 10^30), 
+    // i double perdono un po' di precisione. Usiamo epsilon() per dare
+    // una tolleranza relativa dell'1% (0.01) sui controlli.
+    CHECK(finalEnergy == doctest::Approx(initialEnergy).epsilon(0.01));
+    CHECK(finalAngMom == doctest::Approx(initialAngMom).epsilon(0.01));
 }
 
 TEST_CASE("Simulation::step - merged bodies")
