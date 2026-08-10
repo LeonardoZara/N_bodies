@@ -115,6 +115,13 @@ TEST_CASE("Simulation::step - one body moving with constant velocity")
     CHECK(sim.bodies[0].velocity.y == doctest::Approx(3.0));
 }
 
+TEST_CASE("Simulation::step - elliptical orbit")
+{
+    Simulation sim;
+    sim.bodies.emplace_back
+
+}
+
 TEST_CASE("Simulation::step - merged bodies")
 {
     Simulation sim;
