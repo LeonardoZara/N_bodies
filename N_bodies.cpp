@@ -153,6 +153,7 @@ void Simulation::step(double dt)
                 bodies[j].position = ((bodies[i].position * bodies[i].getMass()) + (bodies[j].position * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
                 bodies[j].velocity = ((bodies[i].velocity * bodies[i].getMass()) + (bodies[j].velocity * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
                 bodies[j].mass += bodies[i].mass;
+                bodies[j].radius = cbrt(pow(bodies[j].radius, 3) + pow(bodies[i].radius, 3)); //New radius, assuming all the bodies have equal density.
                 bodies[i].mass = 0.;
                 merged = true;
             }

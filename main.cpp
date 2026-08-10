@@ -4,7 +4,7 @@
 #include <sstream>
 #include <iomanip>
 #include <cmath>
-#include <deque>
+#include <deque> //per generare le scie
 #include "N_bodies.hpp"
 
 int main()
@@ -21,23 +21,10 @@ int main()
     return EXIT_FAILURE;
   }
 
-  bool viewLagrange;
-  if (sim.bodies.size() == 2)
+  if (sim.bodies.size() == 2) // visualizzazione dei punti di lagrange, come se fossero corpi con massa 0.1 kg)
   {
-    std::cout << "Vuoi visualizzare a schermo i punti di Lagrange del sistema? Rispondi 0 per non visualizzarli, 1 per visualizzarli." << '\n';
-    std::cin >> viewLagrange;
-    if (viewLagrange == 1)
-    {
-      sim.bodies.emplace_back(1, sim.lagrange(3).x, sim.lagrange(3).y, 0., 0., 1);
-      sim.bodies.emplace_back(1, sim.lagrange(4).x, sim.lagrange(4).y, 0., 0., 1);
-    }
-    else
-    {
-      if (viewLagrange != 0)
-      {
-        std::cerr << "Inserire 0 oppure 1." << '\n';
-      }
-    }
+    sim.bodies.emplace_back(0.1, sim.lagrange(3).x, sim.lagrange(3).y, 0., 0., 1);
+    sim.bodies.emplace_back(0.1, sim.lagrange(4).x, sim.lagrange(4).y, 0., 0., 1);
   }
 
   sim.initAccelerations();
@@ -47,11 +34,15 @@ int main()
   sim.angularMomentumRange.update(sim.consAngularMomentum());
   sim.momentumRange.update(sim.consMomentum().module());
 
-  sf::RenderWindow window(sf::VideoMode(800, 800), "N-Body Simulation");
+  constexpr unsigned int windowWidth = 800;
+  constexpr unsigned int windowHeight = 800;
+  constexpr float screenMargin = 10.f; // Margine in pixel per non far toccare inizialmente i pianeti sul bordo.
+
+  sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "N-Body Simulation");
   window.setPosition(sf::Vector2i(50, 50));
 
   // roba per lo zoom
-  //sf::View view = window.getDefaultView();
+  // sf::View view = window.getDefaultView();
 
   std::vector<sf::Color> palette = {
       sf::Color::Red,
@@ -106,10 +97,21 @@ int main()
     return r_min + static_cast<float>(t * (r_max - r_min));
   };
 
+  //Impostare la corretta scala di zoom inziale in base al corpo più lontano dall'origine.
+  double maxInitialDist{0.};
+  maxInitialDist = (*std::max_element(sim.bodies.begin(), sim.bodies.end(), [](const Planet &a, const Planet &b)
+                                      { return a.position.module() < b.position.module(); }))
+                       .position.module();
+  double scale = 1.0;
+  if (maxInitialDist > 0.0)
+  {
+    scale = ((windowWidth / 2.0) - screenMargin) / maxInitialDist;
+  }
+
+
   double dt = 3600.0;
-  const double dtMin = 60.0;
+  const double dtMin = 0.01;
   const double dtMax = 21600.0;
-  double scale = 360.0 / 4.515e12;
   int subSteps = 15;
   const int minSubSteps = 1;
   const int maxSubSteps = 30;
@@ -182,8 +184,8 @@ int main()
       sf::VertexArray trailLine(sf::LineStrip, trails[i].size());
       for (size_t j = 0; j < trails[i].size(); ++j)
       {
-        double trailScreenX = 400 + trails[i][j].x * scale;
-        double trailScreenY = 400 + trails[i][j].y * scale;
+        double trailScreenX = (windowWidth / 2) + trails[i][j].x * scale;
+        double trailScreenY = (windowHeight / 2) + trails[i][j].y * scale;
 
         trailLine[j].position = sf::Vector2f(trailScreenX, trailScreenY);
 
@@ -199,8 +201,8 @@ int main()
       circle.setFillColor(bodyColor);
       circle.setOrigin(finalRadius, finalRadius); // centra il cerchio sul punto
 
-      double screenX = 400 + body.position.x * scale;
-      double screenY = 400 + body.position.y * scale;
+      double screenX = (windowWidth/2) + body.position.x * scale;
+      double screenY = (windowHeight/2) + body.position.y * scale;
       circle.setPosition(screenX, screenY);
 
       window.draw(circle);
@@ -225,9 +227,10 @@ int main()
 
     std::ostringstream oss2;
     oss2 << "To change the speed of the simulation press Up/Down arrows." << '\n';
-    oss2 << "Speed: " << subSteps << " iterations per frame" << '\n';
+    oss2 << "Current speed: " << subSteps << " iterations per frame" << '\n';
     oss2 << "To change the dt (time between each calculated iteration) press Left/Right arrows." << '\n';
-    oss2 << "dt: " << dt / 60 << " minutes" << '\n';
+    oss2 << "Current dt: " << dt / 60 << " minutes" << '\n';
+    oss2 << "Use the mouse or the trackpad to zoom in/out." << '\n';
 
     instructionsText.setString(oss2.str());
 
