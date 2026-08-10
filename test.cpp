@@ -1,4 +1,3 @@
-//CIAO QUI FAREMO TANTI BEI TEST
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 #include "N_bodies.hpp"

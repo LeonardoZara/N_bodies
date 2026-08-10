@@ -8,7 +8,6 @@
 
 class Planet
 {
-
 public:
     Vicktor position;
     Vicktor velocity;
@@ -40,6 +39,7 @@ struct MinMaxTracker
 {
     double min{std::numeric_limits<double>::infinity()};
     double max{-std::numeric_limits<double>::infinity()};
+
     void update(double v)
     {
         min = std::min(min, v);
@@ -51,7 +51,6 @@ class Simulation
 {
     static constexpr double G{6.6743e-11};
     
-
 public:
     std::vector<Planet> bodies;
     MinMaxTracker energyRange;

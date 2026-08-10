@@ -71,12 +71,11 @@ static Vicktor gravAcceleration(const std::vector<Planet> &bodies, size_t i, dou
 
 double Simulation::consEnergy() const
 {
-    // Conservazione energia:
     double k{0};
     double u{0};
-    for (size_t i = 0; i < bodies.size(); ++i)
+    for (const auto &body : bodies)
     {
-        k += 0.5 * bodies[i].getMass() * pow(bodies[i].velocity.module(), 2);
+        k += 0.5 * body.getMass() * pow(body.velocity.module(), 2);
     }
     for (size_t j = 1; j < bodies.size(); ++j)
     {
@@ -94,10 +93,10 @@ Vicktor Simulation::centreOfMass() const
     Vicktor cm{0, 0};
     Vicktor cmNumerator{0., 0.};
     double totalMass{0.};
-    for (size_t i = 0; i < bodies.size(); ++i)
+    for (const auto &body : bodies)
     {
-        cmNumerator = cm + (bodies[i].position * bodies[i].getMass());
-        totalMass += bodies[i].getMass();
+        cmNumerator += (body.position * body.getMass());
+        totalMass += body.getMass();
     }
     cm = cmNumerator * (1 / totalMass);
     return cm;
@@ -114,9 +113,9 @@ double Simulation::consAngularMomentum() const
 {
     Vicktor cm = centreOfMass();
     double angularMomentum{0};
-    for (size_t i = 0; i < bodies.size(); ++i)
+    for (const auto &body : bodies)
     {
-        angularMomentum += bodies[i].getMass() * (((bodies[i].position.x - cm.x) * bodies[i].velocity.y) - (((bodies[i].position.y - cm.y) * bodies[i].velocity.x)));
+        angularMomentum += body.getMass() * (((body.position.x - cm.x) * body.velocity.y) - (((body.position.y - cm.y) * body.velocity.x)));
     }
     return angularMomentum;
 }
@@ -125,9 +124,9 @@ Vicktor Simulation::consMomentum() const
 {
     Vicktor momentum{0., 0.};
 
-    for (size_t i = 0; i < bodies.size(); ++i)
+    for (const auto &body : bodies)
     {
-        momentum += bodies[i].velocity * bodies[i].getMass();
+        momentum += body.velocity * body.getMass();
     }
     return momentum;
 }
@@ -175,9 +174,10 @@ void Simulation::step(double dt)
         initAccelerations();
     }
     // FINE CONTROLLO COLLISIONI
-    for (size_t i = 0; i < bodies.size(); ++i) // calcolo delle posizioni ogni dt
+
+    for (auto &body : bodies) // calcolo delle posizioni ogni dt
     {
-        bodies[i].position = bodies[i].position + (bodies[i].velocity * dt) + (bodies[i].acceleration * (0.5 * dt * dt));
+        body.position += (body.velocity * dt) + (body.acceleration * (0.5 * dt * dt));
     }
     for (size_t i = 0; i < bodies.size(); ++i) // calcolo delle velocità e accelerazioni ogni dt
     {

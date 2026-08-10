@@ -49,7 +49,7 @@ file(COPY font.ttf DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Release)
 
 # il testing e' abilitato di default
 # per disabilitarlo, passare -DBUILD_TESTING=OFF a cmake durante la fase di configurazione
-#if (BUILD_TESTING)
+# if (BUILD_TESTING)
 #
 # aggiungi l'eseguibile progetto.t
 # add_executable(progetto.t file.t.cpp)

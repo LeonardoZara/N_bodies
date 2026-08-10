@@ -42,23 +42,16 @@ int main()
 
   sim.initAccelerations();
 
-  double initEnergy = sim.consEnergy();
-  std::cout << "Energia meccanica iniziale: " << initEnergy << '\n';
-  sim.energyRange.update(initEnergy);
-
-  double initAngularMomentum = sim.consAngularMomentum();
-  std::cout << "Momento angolare iniziale: " << initAngularMomentum << '\n';
-  sim.angularMomentumRange.update(initAngularMomentum);
-
-  double initMomentum = sim.consMomentum().module();
-  std::cout << "Quantità di moto iniziale: " << initMomentum << '\n';
-  sim.momentumRange.update(initMomentum);
+  // Calculating initial energy and momentums.
+  sim.energyRange.update(sim.consEnergy());
+  sim.angularMomentumRange.update(sim.consAngularMomentum());
+  sim.momentumRange.update(sim.consMomentum().module());
 
   sf::RenderWindow window(sf::VideoMode(800, 800), "N-Body Simulation");
   window.setPosition(sf::Vector2i(50, 50));
 
   // roba per lo zoom
-  sf::View view = window.getDefaultView();
+  //sf::View view = window.getDefaultView();
 
   std::vector<sf::Color> palette = {
       sf::Color::Red,
@@ -75,6 +68,7 @@ int main()
     std::cerr << "Errore: impossibile caricare il font.ttf!\n";
     return EXIT_FAILURE;
   }
+
   sf::Text legendText;
   legendText.setFont(font);
   legendText.setCharacterSize(15);
@@ -87,8 +81,30 @@ int main()
   instructionsText.setPosition(10.f, 650.f);
 
   // aggiustare le scie per lo zoom: le facciamo con l'array invece che il fade rectangle
-  const size_t MAX_TRAIL_LENGTH = 1000; // Lunghezza della scia (numero di punti memorizzati)
+  const size_t trailLength = 1000; // Lunghezza della scia (numero di punti memorizzati)
   std::vector<std::deque<sf::Vector2f>> trails(sim.bodies.size());
+
+  // Mappatura massa -> raggio grafico.
+  const double m_min = 3.3e23;   // Massa di Mercurio
+  const double m_max = 1.989e30; // Massa del Sole
+  const float r_min = 2.0f;
+  const float r_max = 10.0f;
+  const double logMin = std::log10(m_min);
+  const double logMax = std::log10(m_max);
+
+  auto massToRadius = [&](double mass) -> float
+  {
+    if (mass <= m_min)
+    {
+      return r_min;
+    }
+    if (mass >= m_max)
+    {
+      return r_max;
+    }
+    double t = (std::log10(mass) - logMin) / (logMax - logMin);
+    return r_min + static_cast<float>(t * (r_max - r_min));
+  };
 
   double dt = 3600.0;
   const double dtMin = 60.0;
@@ -157,7 +173,7 @@ int main()
       // qui calcoliamo le scie
       //  Salviamo la posizione fisica (non i pixel) nella coda
       trails[i].push_back(sf::Vector2f(body.position.x, body.position.y));
-      if (trails[i].size() > MAX_TRAIL_LENGTH)
+      if (trails[i].size() > trailLength)
       {
         trails[i].pop_front();
       }
@@ -166,8 +182,8 @@ int main()
       sf::VertexArray trailLine(sf::LineStrip, trails[i].size());
       for (size_t j = 0; j < trails[i].size(); ++j)
       {
-        float trailScreenX = 400 + trails[i][j].x * scale;
-        float trailScreenY = 400 + trails[i][j].y * scale;
+        double trailScreenX = 400 + trails[i][j].x * scale;
+        double trailScreenY = 400 + trails[i][j].y * scale;
 
         trailLine[j].position = sf::Vector2f(trailScreenX, trailScreenY);
 
@@ -177,59 +193,20 @@ int main()
       }
       window.draw(trailLine);
 
-      // qui calcoliamo il raggio logaritmico per la grafica
-      //  1. Definisci i limiti di massa (basati sui tuoi dati del Sistema Solare)
-      const double m_min = 3.3e23;   // Massa di Mercurio (limite inferiore)
-      const double m_max = 1.989e30; // Massa del Sole (limite superiore)
-
-      // 2. Definisci i limiti visivi in pixel
-      const float r_min = 2.0f;  // Grandezza del "puntino" piccolo
-      const float r_max = 10.0f; // Grandezza del cerchio massimo (es. Sole o Giove)
-
-      // 3. Ottieni la massa del corpo corrente
-      // (nota: ho usato getMass() basandomi sul tuo codice commentato.
-      // Se nella tua struct è una variabile pubblica, usa semplicemente body.massa o simile)
-      double currentMass = body.getMass();
-      float finalRadius = r_min;
-
-      // 4. Applica la logica delle soglie e del logaritmo
-      if (currentMass <= m_min)
-      {
-        // Sotto o uguale al minimo: rimane un piccolo punto
-        finalRadius = r_min;
-      }
-      else if (currentMass >= m_max)
-      {
-        // Sopra o uguale al massimo: raggiunge la grandezza massima
-        finalRadius = r_max;
-      }
-      else
-      {
-        // Interpolazione logaritmica: calcoliamo quanto siamo distanti (in percentuale)
-        // tra l'esponente di Mercurio e quello del Sole.
-        double logMass = std::log10(currentMass);
-        double logMin = std::log10(m_min);
-        double logMax = std::log10(m_max);
-
-        // t sarà un valore da 0.0 (vicino a m_min) a 1.0 (vicino a m_max)
-        double t = (logMass - logMin) / (logMax - logMin);
-
-        // Mappiamo la percentuale sui pixel
-        finalRadius = r_min + static_cast<float>(t * (r_max - r_min));
-      }
+      float finalRadius = massToRadius(body.getMass());
 
       sf::CircleShape circle(finalRadius); // se vogliamo rimetterlo fisso basta mettere (6.f)
       circle.setFillColor(bodyColor);
       circle.setOrigin(finalRadius, finalRadius); // centra il cerchio sul punto
 
-      float screenX = 400 + body.position.x * scale;
-      float screenY = 400 + body.position.y * scale;
+      double screenX = 400 + body.position.x * scale;
+      double screenY = 400 + body.position.y * scale;
       circle.setPosition(screenX, screenY);
 
       window.draw(circle);
     }
 
-    // LEGENDA:
+    // LEGENDE:
     double currentEnergy = sim.consEnergy();
     double currentMomentum = sim.consMomentum().module();
     double currentAngMomentum = sim.consAngularMomentum();
