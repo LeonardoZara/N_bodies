@@ -77,9 +77,9 @@ int main()
   }
   sf::Text legendText;
   legendText.setFont(font);
-  legendText.setCharacterSize(15);           // Dimensione del carattere in pixel
-  legendText.setFillColor(sf::Color::White); // Colore del testo
-  legendText.setPosition(10.f, 10.f);        // Posizione in alto a sinistra (x, y)
+  legendText.setCharacterSize(15);
+  legendText.setFillColor(sf::Color::White);
+  legendText.setPosition(10.f, 10.f);
   sf::Text instructionsText;
   instructionsText.setFont(font);
   instructionsText.setCharacterSize(15);
@@ -250,7 +250,7 @@ int main()
     oss2 << "To change the speed of the simulation press Up/Down arrows." << '\n';
     oss2 << "Speed: " << subSteps << " iterations per frame" << '\n';
     oss2 << "To change the dt (time between each calculated iteration) press Left/Right arrows." << '\n';
-    oss2 << "dt: " << dt/60 << " minutes" << '\n';
+    oss2 << "dt: " << dt / 60 << " minutes" << '\n';
 
     instructionsText.setString(oss2.str());
 
