@@ -80,14 +80,14 @@ double Simulation::consEnergy()
     double u{0};
     for (size_t i = 0; i < bodies.size(); ++i)
     {
-        k += 0.5 * bodies[i].getMass() * pow(bodies[i].velocity.module(bodies[i].velocity), 2);
+        k += 0.5 * bodies[i].getMass() * pow(bodies[i].velocity.module(), 2);
     }
     for (size_t j = 1; j < bodies.size(); ++j)
     {
         for (size_t i = 0; i < j; ++i)
         {
-            Vicktor distance = bodies[i].position.subtract(bodies[i].position, bodies[j].position);
-            u += -G * bodies[i].getMass() * bodies[j].getMass() / bodies[i].position.module(distance);
+            Vicktor distance = bodies[i].position - bodies[j].position;
+            u += -G * bodies[i].getMass() * bodies[j].getMass() / distance.module();
         }
     }
     return k + u;
@@ -100,10 +100,10 @@ Vicktor Simulation::centreOfMass()
     double totalMass{0.};
     for (size_t i = 0; i < bodies.size(); ++i)
     {
-        cmNumerator = cm.sum(cm, cm.scalar_multi(bodies[i].position, bodies[i].getMass()));
+        cmNumerator = cm + (bodies[i].position * bodies[i].getMass());
         totalMass += bodies[i].getMass();
     }
-    cm = cm.scalar_multi(cmNumerator, (1 / totalMass));
+    cm = cmNumerator * (1/totalMass);
     return cm;
 }
 
@@ -134,7 +134,7 @@ Vicktor Simulation::consMomentum()
 
     for (size_t i = 0; i < bodies.size(); ++i)
     {
-        momentum = momentum.sum(momentum, bodies[i].velocity.scalar_multi(bodies[i].velocity, bodies[i].getMass()));
+        momentum += bodies[i].velocity * bodies[i].getMass();
     }
     return momentum;
 }
@@ -156,10 +156,10 @@ void Simulation::step(double dt)
     {
         for (size_t i = 0; i < j; ++i)
         {
-            if (bodies[i].position.module(bodies[i].position.subtract(bodies[i].position, bodies[j].position)) <= (bodies[i].getRadius() + bodies[j].getRadius()))
+            if((bodies[i].position-bodies[j].position).module()<=(bodies[i].getRadius() + bodies[j].getRadius()))
             {
-                bodies[j].position = bodies[j].position.scalar_multi(bodies[j].position.sum(bodies[i].position.scalar_multi(bodies[i].position, bodies[i].getMass()), bodies[j].position.scalar_multi(bodies[j].position, bodies[j].getMass())), 1 / (bodies[i].getMass() + bodies[j].getMass()));
-                bodies[j].velocity = bodies[j].velocity.scalar_multi(bodies[j].velocity.sum(bodies[i].velocity.scalar_multi(bodies[i].velocity, bodies[i].getMass()), bodies[j].velocity.scalar_multi(bodies[j].velocity, bodies[j].getMass())), 1 / (bodies[i].getMass() + bodies[j].getMass()));
+                bodies[j].position = ((bodies[i].position * bodies[i].getMass()) + (bodies[j].position *bodies[j].getMass())) *  (1 / (bodies[i].getMass() + bodies[j].getMass()));
+                bodies[j].velocity = ((bodies[i].velocity * bodies[i].getMass()) + (bodies[j].velocity *bodies[j].getMass())) *  (1 / (bodies[i].getMass() + bodies[j].getMass()));
                 bodies[j].mass += bodies[i].mass;
                 bodies[i].mass = 0.;
                 merged = true;
@@ -188,21 +188,19 @@ void Simulation::step(double dt)
     // FINE CONTROLLO COLLISIONI
     for (size_t i = 0; i < bodies.size(); ++i) // calcolo delle posizioni ogni dt
     {
-        bodies[i].position = bodies[i].position.sum(
-            bodies[i].position.sum(bodies[i].position, bodies[i].velocity.scalar_multi(bodies[i].velocity, dt)),
-            bodies[i].acceleration.scalar_multi(bodies[i].acceleration, 0.5 * dt * dt));
+            bodies[i].position = bodies[i].position + (bodies[i].velocity * dt) + (bodies[i].acceleration * (0.5 * dt * dt));
     }
     for (size_t i = 0; i < bodies.size(); ++i) // calcolo delle velocità e accelerazioni ogni dt
     {
         Vicktor acc_old = bodies[i].acceleration;
         Vicktor acc_new = gravAcceleration(bodies, i, G);
-        Vicktor acc_sum = acc_old.sum(acc_old, acc_new);
-        bodies[i].velocity = bodies[i].velocity.sum(bodies[i].velocity, bodies[i].velocity.scalar_multi(acc_sum, 0.5 * dt));
+        Vicktor acc_sum = acc_old + acc_new;
+        bodies[i].velocity = bodies[i].velocity + (acc_sum *( 0.5 * dt));
         bodies[i].acceleration = acc_new;
     }
     energiesHistory.push_back(consEnergy());
     angularMomentumHistory.push_back(consAngularMomentum());
-    momentumHistory.push_back(consMomentum().module(consMomentum()));
+    momentumHistory.push_back(consMomentum().module());
 }
 
 Vicktor Simulation::lagrange(int i) 
@@ -210,7 +208,7 @@ Vicktor Simulation::lagrange(int i)
 {
     // bodies[0] e bodies[1] devono giacere sull'asse x, e bodies[0] deve avere massa maggiore.
     std::vector<Vicktor> lagPoints(5);
-    double distance = bodies[0].position.module(bodies[0].position.subtract(bodies[0].position, bodies[1].position));
+    double distance = (bodies[0].position - bodies[1].position).module();
     double x1{-bodies[1].getMass() * distance / (bodies[0].getMass() + bodies[1].getMass())};
     double x2{bodies[0].getMass() * distance / (bodies[0].getMass() + bodies[1].getMass())};
     double omega{sqrt(G * (bodies[0].getMass() + bodies[1].getMass()) / (pow(distance, 3)))};
@@ -222,5 +220,5 @@ Vicktor Simulation::lagrange(int i)
     lagPoints[4].y = -sqrt(3) * distance / 2;
     // calcolare L1, L2, L3 è molto difficile, richiede algoritmo di stima soluzioni di equazioni di 5° grado. Vediamo se farlo oppuure no.
 
-    return lagPoints[i].sum(lagPoints[i], centreOfMass());
+    return lagPoints[i] + centreOfMass();
 }

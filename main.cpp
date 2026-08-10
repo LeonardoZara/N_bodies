@@ -50,7 +50,7 @@ int main()
   std::cout << "Momento angolare iniziale: " << initAngularMomentum << '\n';
   solar_system.angularMomentumHistory.push_back(initAngularMomentum);
 
-  double initMomentum = solar_system.consMomentum().module(solar_system.consMomentum());
+  double initMomentum = solar_system.consMomentum().module();
   std::cout << "Quantità di moto iniziale: " << initMomentum << '\n';
   solar_system.momentumHistory.push_back(initMomentum);
 
@@ -231,7 +231,7 @@ int main()
 
     // LEGENDA:
     double currentEnergy = solar_system.consEnergy();
-    double currentMomentum = solar_system.consMomentum().module(solar_system.consMomentum());
+    double currentMomentum = solar_system.consMomentum().module();
     double currentAngMomentum = solar_system.consAngularMomentum();
 
     // Formatta il testo in modo pulito (notazione scientifica per numeri molto grandi/piccoli)
