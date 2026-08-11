@@ -71,13 +71,13 @@ static Vicktor gravAcceleration(const std::vector<Planet> &bodies, size_t i, dou
 
 double Simulation::consEnergy() const
 {
-    double k{0};
-    double u{0};
-    for (const auto &body : bodies)
-    {
-        k += 0.5 * body.getMass() * pow(body.velocity.module(), 2);
-    }
-    for (size_t j = 1; j < bodies.size(); ++j)
+
+    double u{0.};
+    double k{0.};
+    k = std::accumulate(bodies.begin(), bodies.end(), 0.0, [](double kin, const Planet &p)
+                        { return kin + (0.5 * p.getMass() * pow(p.velocity.module(), 2)); });
+
+        for (size_t j = 1; j < bodies.size(); ++j)
     {
         for (size_t i = 0; i < j; ++i)
         {
@@ -120,13 +120,9 @@ double Simulation::consAngularMomentum() const
 
 Vicktor Simulation::consMomentum() const
 {
-    Vicktor momentum{0., 0.};
 
-    for (const auto &body : bodies)
-    {
-        momentum += body.velocity * body.getMass();
-    }
-    return momentum;
+    return std::accumulate(bodies.begin(), bodies.end(), Vicktor{0., 0.}, [](Vicktor momentum, const Planet &p)
+                           { return momentum + (p.velocity * p.getMass()); });
 }
 
 void Simulation::initAccelerations()
