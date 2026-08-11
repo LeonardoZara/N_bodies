@@ -165,14 +165,15 @@ void Simulation::step(double dt)
                 Vicktor velCm = ((bodies[i].velocity * bodies[i].getMass()) + (bodies[j].velocity * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
                 double relativeEnergy = pow((bodies[i].velocity - bodies[j].velocity).module(), 2) * (0.5 * bodies[i].getMass() * bodies[j].getMass() / (bodies[i].getMass()+bodies[j].getMass()));
                 double debrisVelocity = ((bodies[i].velocity - bodies[j].velocity).module()) * sqrt(0.5 * bodies[i].getMass() * bodies[j].getMass() / pow((bodies[i].getMass()+bodies[j].getMass()), 2));
-                double buffer = pi/8;
+                double buffer = pi/4;
                 for(int k=0; k<=7; ++k){ 
-                    bodies.emplace_back((bodies[i].getMass()+bodies[j].getMass())/8, posCm.x + cbrt(pow(bodies[i].getRadius(), 3) + pow(bodies[j].getRadius(), 3))*cos(buffer*k), posCm.y + cbrt(pow(bodies[i].getRadius(), 3) + pow(bodies[j].getRadius(), 3))*sin(buffer*k), velCm.x + (debrisVelocity * cos(buffer * k)), velCm.y + (debrisVelocity * cos(buffer * k)), 1.);
+                    bodies.emplace_back((bodies[i].getMass()+bodies[j].getMass())/8, posCm.x + cbrt(pow(bodies[i].getRadius(), 3) + pow(bodies[j].getRadius(), 3))*cos(buffer*k), posCm.y + cbrt(pow(bodies[i].getRadius(), 3) + pow(bodies[j].getRadius(), 3))*sin(buffer*k), velCm.x + (debrisVelocity * cos(buffer * k)), velCm.y + (debrisVelocity * sin(buffer * k)), 1.);
                 }
                 bodies[i].setMass(0.);
                 bodies[j].setMass(0.);
                 bodies[i].setRadius(0.);
                 bodies[j].setRadius(0.);
+                merged = true;
             }
             if ((bodies[i].position - bodies[j].position).module() <= (bodies[i].getRadius() + bodies[j].getRadius()))
             {
@@ -181,7 +182,7 @@ void Simulation::step(double dt)
                 bodies[j].setMass(bodies[j].getMass() + bodies[i].getMass());
                 bodies[j].setRadius(cbrt(pow(bodies[j].getRadius(), 3) + pow(bodies[i].getRadius(), 3))); // New radius, assuming all the bodies have equal density.
                 bodies[i].setMass(0.);
-                bodies[j].setRadius(0.);
+                bodies[i].setRadius(0.);
                 merged = true;
             }
         }
