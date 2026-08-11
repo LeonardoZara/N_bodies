@@ -97,7 +97,7 @@ int main()
     return r_min + static_cast<float>(t * (r_max - r_min));
   };
 
-  //Impostare la corretta scala di zoom inziale in base al corpo più lontano dall'origine.
+  //Imposta la corretta scala di zoom inziale in base al corpo più lontano dall'origine.
   double maxInitialDist{0.};
   maxInitialDist = (*std::max_element(sim.bodies.begin(), sim.bodies.end(), [](const Planet &a, const Planet &b)
                                       { return a.position.module() < b.position.module(); }))
@@ -116,6 +116,8 @@ int main()
   const int minSubSteps = 1;
   const int maxSubSteps = 30;
 
+  try
+  {
   while (window.isOpen())
   {
     sf::Event event;
@@ -147,9 +149,6 @@ int main()
         {
           subSteps = std::max(subSteps - 1, minSubSteps);
         }
-      }
-      if (event.type == sf::Event::KeyPressed)
-      {
         if (event.key.code == sf::Keyboard::Right)
         {
           dt = std::min(dt * 1.2, dtMax);
@@ -160,7 +159,6 @@ int main()
         }
       }
     }
-
     for (int k = 0; k < subSteps; k++)
     {
       sim.step(dt);
@@ -238,6 +236,12 @@ int main()
 
     window.display();
   }
+ }
+ catch (const std::exception &e)
+ {
+    std::cerr << "Errore nel calcolo delle collisioni. " << e.what() << '\n';
+    return EXIT_FAILURE;
+ }
 
   std::cout << "L'energia oscilla tra " << sim.energyRange.max << " e " << sim.energyRange.min << '\n';
   std::cout << "Il momento angolare oscilla tra " << sim.angularMomentumRange.max << " e " << sim.angularMomentumRange.min << '\n';

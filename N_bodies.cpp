@@ -32,13 +32,13 @@ void Simulation::loadFromFile(const std::string &filename)
         {
             throw std::invalid_argument("Riga malformata nel file dati: " + line);
         }
-        if (m <= 0)
+        if (m < 0)
         {
             throw std::invalid_argument("La massa non può essere negativa." + line);
         }
         if (radius <= 0)
         {
-            throw std::invalid_argument("Il raggio non può essere negativo." + line);
+            throw std::invalid_argument("Il raggio deve essere positivo." + line);
         }
         if (velx >= 3e8 || vely >= 3e8 || velx <= -3e8 || vely <= -3e8)
         {
@@ -90,7 +90,6 @@ double Simulation::consEnergy() const
 
 Vicktor Simulation::centreOfMass() const
 {
-    Vicktor cm{0, 0};
     Vicktor cmNumerator{0., 0.};
     double totalMass{0.};
     for (const auto &body : bodies)
@@ -98,8 +97,7 @@ Vicktor Simulation::centreOfMass() const
         cmNumerator += (body.position * body.getMass());
         totalMass += body.getMass();
     }
-    cm = cmNumerator * (1 / totalMass);
-    return cm;
+    return cmNumerator * (1 / totalMass);
 }
 
 double Simulation::totalMass() const
@@ -141,46 +139,47 @@ void Simulation::initAccelerations()
 
 void Simulation::step(double dt)
 {
-
+    // controllo collisioni:
     double totalMassUnmerged{totalMass()};
     bool merged = false;
-    for (size_t j = 1; j < bodies.size(); ++j) // controllo di collisioni
+    for (size_t j = 1; j < bodies.size(); ++j)
     {
         for (size_t i = 0; i < j; ++i)
         {
+            if (bodies[i].getMass() == 0.0) // per evitare calcoli inutili toglie dal check i corpi già scontrati ma non ancora eliminati dal vector.
+            {
+                continue;
+            }
             if ((bodies[i].position - bodies[j].position).module() <= (bodies[i].getRadius() + bodies[j].getRadius()))
             {
                 bodies[j].position = ((bodies[i].position * bodies[i].getMass()) + (bodies[j].position * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
                 bodies[j].velocity = ((bodies[i].velocity * bodies[i].getMass()) + (bodies[j].velocity * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
-                bodies[j].setMass(bodies[j].getMass()+bodies[i].getMass());
-                bodies[j].setRadius(cbrt(pow(bodies[j].getRadius(), 3) + pow(bodies[i].getRadius(), 3)));//New radius, assuming all the bodies have equal density.
+                bodies[j].setMass(bodies[j].getMass() + bodies[i].getMass());
+                bodies[j].setRadius(cbrt(pow(bodies[j].getRadius(), 3) + pow(bodies[i].getRadius(), 3))); // New radius, assuming all the bodies have equal density.
                 bodies[i].setMass(0.);
                 merged = true;
             }
         }
     }
-
     bodies.erase(std::remove_if(bodies.begin(), bodies.end(),
                                 [](const Planet &p)
                                 { return p.getMass() == 0.0; }),
                  bodies.end());
 
-    if (totalMass() != totalMassUnmerged) // Questo if si attiva solo se 3 o più corpi si toccano nello stesso momento, e l'algoritmo di "trasferimento massa" si romperebbe.
+    if (totalMass() != totalMassUnmerged) // Si attiva solo se 3 o più corpi si toccano nello stesso momento, e l'algoritmo di "trasferimento massa" si romperebbe.
     {
         throw std::runtime_error("Ci sono state delle collisioni con più di due corpi in contemporanea, non calcolabili da questo programma.");
     }
-
-    if (merged == true)
+    if (merged)
     {
         initAccelerations();
     }
-    // FINE CONTROLLO COLLISIONI
-
-    for (auto &body : bodies) // calcolo delle posizioni ogni dt
+    // Velocity verlet:
+    for (auto &body : bodies)
     {
         body.position += (body.velocity * dt) + (body.acceleration * (0.5 * dt * dt));
     }
-    for (size_t i = 0; i < bodies.size(); ++i) // calcolo delle velocità e accelerazioni ogni dt
+    for (size_t i = 0; i < bodies.size(); ++i)
     {
         Vicktor acc_old = bodies[i].acceleration;
         Vicktor acc_new = gravAcceleration(bodies, i, G);

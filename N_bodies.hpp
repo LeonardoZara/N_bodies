@@ -4,6 +4,8 @@
 #include <vector>
 #include <iostream>
 #include <string>
+#include <limits>
+#include <algorithm>
 #include "vicktor.hpp"
 
 class Planet
@@ -17,6 +19,8 @@ public:
     Planet(double m, double posx, double posy, double velx, double vely, double r, double accex = 0.0, double accey = 0.0)
         : mass(m), radius(r)
     {
+        setMass(m);
+        setRadius(r);
         position.x = posx;
         position.y = posy;
         velocity.x = velx;
@@ -33,12 +37,20 @@ public:
     {
         return radius;
     }
-    void setMass(double newMass)
+   void setMass(double newMass)
     {
+        if (newMass < 0.0)
+        {
+            throw std::invalid_argument("La massa non può essere negativa.");
+        }
         mass = newMass;
     }
     void setRadius(double newRadius)
     {
+        if (newRadius <= 0.0)
+        {
+            throw std::invalid_argument("Il raggio deve essere positivo.");
+        }
         radius = newRadius;
     }
 };
