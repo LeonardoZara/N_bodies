@@ -133,6 +133,19 @@ void Simulation::initAccelerations()
     }
 }
 
+bool Simulation::explosiveCollision(int i, int j) const
+{
+    double relativeVelocity{0.};
+    double escapeVelocity{0.};
+    relativeVelocity = (bodies[i].velocity - bodies[j].velocity).module();
+    escapeVelocity = sqrt(2 * G * (bodies[i].getMass()+bodies[j].getMass())/cbrt(pow(bodies[i].getRadius(), 3) + pow(bodies[j].getRadius(), 3))); // Using new "merged" radius, assuming all the bodies have equal density.
+    bool explosion{false};
+    if(relativeVelocity>=escapeVelocity){
+        explosion = true;
+    }
+    return explosion;
+}
+
 void Simulation::step(double dt)
 {
     // controllo collisioni:
@@ -146,6 +159,21 @@ void Simulation::step(double dt)
             {
                 continue;
             }
+            if ((bodies[i].position - bodies[j].position).module() <= (bodies[i].getRadius() + bodies[j].getRadius()) && explosiveCollision(i, j))
+            {
+                Vicktor posCm = ((bodies[i].position * bodies[i].getMass()) + (bodies[j].position * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
+                Vicktor velCm = ((bodies[i].velocity * bodies[i].getMass()) + (bodies[j].velocity * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
+                double relativeEnergy = pow((bodies[i].velocity - bodies[j].velocity).module(), 2) * (0.5 * bodies[i].getMass() * bodies[j].getMass() / (bodies[i].getMass()+bodies[j].getMass()));
+                double debrisVelocity = ((bodies[i].velocity - bodies[j].velocity).module()) * sqrt(0.5 * bodies[i].getMass() * bodies[j].getMass() / pow((bodies[i].getMass()+bodies[j].getMass()), 2));
+                double buffer = pi/8;
+                for(int k=0; k<=7; ++k){ 
+                    bodies.emplace_back((bodies[i].getMass()+bodies[j].getMass())/8, posCm.x + cbrt(pow(bodies[i].getRadius(), 3) + pow(bodies[j].getRadius(), 3))*cos(buffer*k), posCm.y + cbrt(pow(bodies[i].getRadius(), 3) + pow(bodies[j].getRadius(), 3))*sin(buffer*k), velCm.x + (debrisVelocity * cos(buffer * k)), velCm.y + (debrisVelocity * cos(buffer * k)), 1.);
+                }
+                bodies[i].setMass(0.);
+                bodies[j].setMass(0.);
+                bodies[i].setRadius(0.);
+                bodies[j].setRadius(0.);
+            }
             if ((bodies[i].position - bodies[j].position).module() <= (bodies[i].getRadius() + bodies[j].getRadius()))
             {
                 bodies[j].position = ((bodies[i].position * bodies[i].getMass()) + (bodies[j].position * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
@@ -153,6 +181,7 @@ void Simulation::step(double dt)
                 bodies[j].setMass(bodies[j].getMass() + bodies[i].getMass());
                 bodies[j].setRadius(cbrt(pow(bodies[j].getRadius(), 3) + pow(bodies[i].getRadius(), 3))); // New radius, assuming all the bodies have equal density.
                 bodies[i].setMass(0.);
+                bodies[j].setRadius(0.);
                 merged = true;
             }
         }

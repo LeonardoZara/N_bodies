@@ -47,9 +47,9 @@ public:
     }
     void setRadius(double newRadius)
     {
-        if (newRadius <= 0.0)
+        if (newRadius < 0.0)
         {
-            throw std::invalid_argument("Il raggio deve essere positivo.");
+            throw std::invalid_argument("Il raggio non deve essere negativo.");
         }
         radius = newRadius;
     }
@@ -70,6 +70,7 @@ struct MinMaxTracker
 class Simulation
 {
     static constexpr double G{6.6743e-11};
+    static constexpr double pi = 3.14159265358979323846;
 
 public:
     std::vector<Planet> bodies;
@@ -83,6 +84,7 @@ public:
     double consAngularMomentum() const;
     Vicktor consMomentum() const;
     void initAccelerations();
+    bool explosiveCollision(int i, int j) const;
     void step(double dt);
     Vicktor lagrange(int i) const;
 };

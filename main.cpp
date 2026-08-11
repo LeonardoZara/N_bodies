@@ -4,7 +4,7 @@
 #include <sstream>
 #include <iomanip>
 #include <cmath>
-#include <deque> //per generare le scie
+//#include <deque> //per generare le scie
 #include "N_bodies.hpp"
 
 int main()
@@ -21,12 +21,12 @@ int main()
     return EXIT_FAILURE;
   }
 
-  if (sim.bodies.size() == 2) // visualizzazione dei punti di lagrange, come se fossero corpi con massa 0.1 kg)
+  /*if (sim.bodies.size() == 2) // visualizzazione dei punti di lagrange, come se fossero corpi con massa 0.1 kg)
   {
     sim.bodies.emplace_back(0.1, sim.lagrange(3).x, sim.lagrange(3).y, 0., 0., 1);
     sim.bodies.emplace_back(0.1, sim.lagrange(4).x, sim.lagrange(4).y, 0., 0., 1);
   }
-
+*/
   sim.initAccelerations();
 
   // Calculating initial energy and momentums.
@@ -72,8 +72,8 @@ int main()
   instructionsText.setPosition(10.f, 650.f);
 
   // aggiustare le scie per lo zoom: le facciamo con l'array invece che il fade rectangle
-  const size_t trailLength = 1000; // Lunghezza della scia (numero di punti memorizzati)
-  std::vector<std::deque<sf::Vector2f>> trails(sim.bodies.size());
+  //const size_t trailLength = 1000; // Lunghezza della scia (numero di punti memorizzati)
+  //std::vector<std::deque<sf::Vector2f>> trails(sim.bodies.size());
 
   // Mappatura massa -> raggio grafico.
   const double m_min = 3.3e23;   // Massa di Mercurio
@@ -172,15 +172,15 @@ int main()
 
       // qui calcoliamo le scie
       //  Salviamo la posizione fisica (non i pixel) nella coda
-      trails[i].push_back(sf::Vector2f(body.position.x, body.position.y));
-      if (trails[i].size() > trailLength)
-      {
-        trails[i].pop_front();
-      }
+      //trails[i].push_back(sf::Vector2f(body.position.x, body.position.y));
+      //if (trails[i].size() > trailLength)
+      //{
+      //  trails[i].pop_front();
+      //}
 
       // Disegniamo la scia applicando la variabile 'scale' in tempo reale (perfetto per lo zoom)
-      sf::VertexArray trailLine(sf::LineStrip, trails[i].size());
-      for (size_t j = 0; j < trails[i].size(); ++j)
+      //sf::VertexArray trailLine(sf::LineStrip, trails[i].size());
+      /*for (size_t j = 0; j < trails[i].size(); ++j)
       {
         double trailScreenX = (windowWidth / 2) + trails[i][j].x * scale;
         double trailScreenY = (windowHeight / 2) + trails[i][j].y * scale;
@@ -191,7 +191,7 @@ int main()
         sf::Uint8 alpha = static_cast<sf::Uint8>((255 * j) / trails[i].size());
         trailLine[j].color = sf::Color(bodyColor.r, bodyColor.g, bodyColor.b, alpha);
       }
-      window.draw(trailLine);
+      window.draw(trailLine);*/
 
       float finalRadius = massToRadius(body.getMass());
 
