@@ -1,7 +1,13 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+
+#include <fstream>
+#include <cstdio>
+#include <string>
+#include <vector>
 #include "doctest.h"
-#include "N_bodies.hpp"
 #include "vicktor.hpp"
+#include "N_bodies.hpp"
+
 
 
 TEST_CASE("Vicktor: basic operations")
