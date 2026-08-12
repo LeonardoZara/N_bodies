@@ -4,7 +4,7 @@
 #include <sstream>
 #include <iomanip>
 #include <cmath>
-//#include <deque> //per generare le scie
+#include <deque> //per generare le scie
 #include "N_bodies.hpp"
 
 int main()
@@ -72,29 +72,33 @@ int main()
   instructionsText.setPosition(10.f, 650.f);
 
   // aggiustare le scie per lo zoom: le facciamo con l'array invece che il fade rectangle
-  //const size_t trailLength = 1000; // Lunghezza della scia (numero di punti memorizzati)
-  //std::vector<std::deque<sf::Vector2f>> trails(sim.bodies.size());
+  const size_t trailLength = 1000; // Lunghezza della scia (numero di punti memorizzati)
+  std::vector<std::deque<sf::Vector2f>> trails(sim.bodies.size());
 
-  // Mappatura massa -> raggio grafico.
-  const double m_min = 3.3e23;   // Massa di Mercurio
-  const double m_max = 1.989e30; // Massa del Sole
-  const float r_min = 2.0f;
-  const float r_max = 10.0f;
-  const double logMin = std::log10(m_min);
-  const double logMax = std::log10(m_max);
+  // Mappatura raggio -> raggio grafico.
+  const double r_min = 2.4397e6;   // raggio di Mercurio
+  const double r_max = 6.9634e8; // raggio del Sole
+  const float graphic_min = 2.0f;
+  const float graphic_max = 10.0f;
+  const double logMin = std::log10(r_min);
+  const double logMax = std::log10(r_max);
 
-  auto massToRadius = [&](double mass) -> float
+  auto radiusToRadius = [&](double radius) -> float
   {
-    if (mass <= m_min)
+    if (radius == 0.0) //di sicurezza
     {
-      return r_min;
+        return 0.0f;
     }
-    if (mass >= m_max)
+    if (radius <= r_min)
     {
-      return r_max;
+      return graphic_min;
     }
-    double t = (std::log10(mass) - logMin) / (logMax - logMin);
-    return r_min + static_cast<float>(t * (r_max - r_min));
+    if (radius >= r_max)
+    {
+      return graphic_max;
+    }
+    double t = (std::log10(radius) - logMin) / (logMax - logMin);
+    return graphic_min + static_cast<float>(t * (graphic_max - graphic_min));
   };
 
   //Imposta la corretta scala di zoom inziale in base al corpo più lontano dall'origine.
@@ -109,7 +113,7 @@ int main()
   }
 
 
-  double dt = 3600.0;
+  double dt = 60.0;
   const double dtMin = 0.01;
   const double dtMax = 21600.0;
   int subSteps = 15;
@@ -163,6 +167,12 @@ int main()
     {
       sim.step(dt);
     }
+
+    // Se il numero di corpi è cambiato (collisione), resetta tutte le scie
+    if (trails.size() != sim.bodies.size())
+    {
+        trails.assign(sim.bodies.size(), std::deque<sf::Vector2f>());
+    }
     window.clear(sf::Color::Black);
 
     for (size_t i = 0; i < sim.bodies.size(); ++i)
@@ -172,15 +182,15 @@ int main()
 
       // qui calcoliamo le scie
       //  Salviamo la posizione fisica (non i pixel) nella coda
-      //trails[i].push_back(sf::Vector2f(body.position.x, body.position.y));
-      //if (trails[i].size() > trailLength)
-      //{
-      //  trails[i].pop_front();
-      //}
+      trails[i].push_back(sf::Vector2f(body.position.x, body.position.y));
+      if (trails[i].size() > trailLength)
+      {
+        trails[i].pop_front();
+      }
 
       // Disegniamo la scia applicando la variabile 'scale' in tempo reale (perfetto per lo zoom)
-      //sf::VertexArray trailLine(sf::LineStrip, trails[i].size());
-      /*for (size_t j = 0; j < trails[i].size(); ++j)
+      sf::VertexArray trailLine(sf::LineStrip, trails[i].size());
+      for (size_t j = 0; j < trails[i].size(); ++j)
       {
         double trailScreenX = (windowWidth / 2) + trails[i][j].x * scale;
         double trailScreenY = (windowHeight / 2) + trails[i][j].y * scale;
@@ -191,11 +201,11 @@ int main()
         sf::Uint8 alpha = static_cast<sf::Uint8>((255 * j) / trails[i].size());
         trailLine[j].color = sf::Color(bodyColor.r, bodyColor.g, bodyColor.b, alpha);
       }
-      window.draw(trailLine);*/
+      window.draw(trailLine);
 
-      float finalRadius = massToRadius(body.getMass());
+      float finalRadius = radiusToRadius(body.getRadius());
 
-      sf::CircleShape circle(finalRadius); // se vogliamo rimetterlo fisso basta mettere (6.f)
+      sf::CircleShape circle(finalRadius);
       circle.setFillColor(bodyColor);
       circle.setOrigin(finalRadius, finalRadius); // centra il cerchio sul punto
 
@@ -216,7 +226,8 @@ int main()
     oss << std::scientific << std::setprecision(8); // 8 cifre decimali
     oss << "Current Mechanical Energy: " << currentEnergy << " J\n";
     oss << "Current Momentum: " << currentMomentum << " kg*m/s\n";
-    oss << "Current Angular Momentum:  " << currentAngMomentum << " kg*m^2/s";
+    oss << "Current Angular Momentum:  " << currentAngMomentum << " kg*m^2/s\n";
+    oss << "Current number of bodies: " << sim.bodies.size() << '\n';
 
     // Assegna la stringa creata al testo e disegnalo
     legendText.setString(oss.str());
@@ -227,7 +238,7 @@ int main()
     oss2 << "To change the speed of the simulation press Up/Down arrows." << '\n';
     oss2 << "Current speed: " << subSteps << " iterations per frame" << '\n';
     oss2 << "To change the dt (time between each calculated iteration) press Left/Right arrows." << '\n';
-    oss2 << "Current dt: " << dt / 60 << " minutes" << '\n';
+    oss2 << "Current dt: " << dt << " seconds" << '\n';
     oss2 << "Use the mouse or the trackpad to zoom in/out." << '\n';
 
     instructionsText.setString(oss2.str());

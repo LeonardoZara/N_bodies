@@ -77,7 +77,7 @@ double Simulation::consEnergy() const
     k = std::accumulate(bodies.begin(), bodies.end(), 0.0, [](double kin, const Planet &p)
                         { return kin + (0.5 * p.getMass() * pow(p.velocity.module(), 2)); });
 
-        for (size_t j = 1; j < bodies.size(); ++j)
+    for (size_t j = 1; j < bodies.size(); ++j)
     {
         for (size_t i = 0; i < j; ++i)
         {
@@ -138,9 +138,10 @@ bool Simulation::explosiveCollision(int i, int j) const
     double relativeVelocity{0.};
     double escapeVelocity{0.};
     relativeVelocity = (bodies[i].velocity - bodies[j].velocity).module();
-    escapeVelocity = sqrt(2 * G * (bodies[i].getMass()+bodies[j].getMass())/cbrt(pow(bodies[i].getRadius(), 3) + pow(bodies[j].getRadius(), 3))); // Using new "merged" radius, assuming all the bodies have equal density.
+    escapeVelocity = sqrt(2 * G * (bodies[i].getMass() + bodies[j].getMass()) / cbrt(pow(bodies[i].getRadius(), 3) + pow(bodies[j].getRadius(), 3))); // Using new "merged" radius, assuming all the bodies have equal density.
     bool explosion{false};
-    if(relativeVelocity>=escapeVelocity){
+    if (relativeVelocity >= escapeVelocity)
+    {
         explosion = true;
     }
     return explosion;
@@ -150,40 +151,68 @@ void Simulation::step(double dt)
 {
     // controllo collisioni:
     double totalMassUnmerged{totalMass()};
-    bool merged = false;
-    for (size_t j = 1; j < bodies.size(); ++j)
+    bool collision = false;
+    size_t numberBodies{bodies.size()};
+    for (size_t j = 1; j < numberBodies; ++j)
     {
+        if (bodies[j].getMass() == 0.0) // per evitare calcoli inutili toglie dal check i corpi già scontrati ma non ancora eliminati dal vector.
+        {
+            continue;
+        }
         for (size_t i = 0; i < j; ++i)
         {
             if (bodies[i].getMass() == 0.0) // per evitare calcoli inutili toglie dal check i corpi già scontrati ma non ancora eliminati dal vector.
             {
                 continue;
             }
-            if ((bodies[i].position - bodies[j].position).module() <= (bodies[i].getRadius() + bodies[j].getRadius()) && explosiveCollision(i, j))
+            
+            if (((bodies[i].position - bodies[j].position).module() <= (bodies[i].getRadius() + bodies[j].getRadius())) && explosiveCollision(i, j) == true )
+            //urto con velRelativa>=velFuga, allora urto "elastico" in cui il corpo minore si frantuma in detriti, che vengono espulsi con la stessa velocità di impatto.
             {
+                size_t major{0};
+                size_t minor{0};
+                if(bodies[i].getMass()>=bodies[j].getMass()){
+                    major = i;
+                    minor = j;
+                }
+                else{
+                    major = j;
+                    minor = i;
+                }
                 Vicktor posCm = ((bodies[i].position * bodies[i].getMass()) + (bodies[j].position * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
                 Vicktor velCm = ((bodies[i].velocity * bodies[i].getMass()) + (bodies[j].velocity * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
-                //double relativeEnergy = pow((bodies[i].velocity - bodies[j].velocity).module(), 2) * (0.5 * bodies[i].getMass() * bodies[j].getMass() / (bodies[i].getMass()+bodies[j].getMass()));
-                double debrisVelocity = ((bodies[i].velocity - bodies[j].velocity).module()) * sqrt(0.1 * bodies[i].getMass() * bodies[j].getMass() / pow((bodies[i].getMass()+bodies[j].getMass()), 2));
-                double buffer = pi/4;
-                for(int k=0; k<=7; ++k){ 
-                    bodies.emplace_back((bodies[i].getMass()+bodies[j].getMass())/8, posCm.x + ((bodies[i].position - bodies[j].position).module())*cos(buffer*k), posCm.y + ((bodies[i].position - bodies[j].position).module())*sin(buffer*k), velCm.x + (debrisVelocity * cos(buffer * k)), velCm.y + (debrisVelocity * sin(buffer * k)), 1.);
+                double placementRadius = bodies[i].getRadius() + bodies[j].getRadius();
+                double debrisRadius = bodies[minor].getRadius()*cbrt(1. / 8.);
+                double debrisVelocity = (bodies[i].velocity - bodies[j].velocity).module() * sqrt(bodies[major].getMass()/(bodies[major].getMass() + bodies[minor].getMass()));
+                double buffer = pi / 4;
+                for (int k = 0; k <= 7; ++k)
+                {
+                    bodies.emplace_back(bodies[minor].getMass() / 8,
+                                        posCm.x + placementRadius * cos(buffer * k),
+                                        posCm.y + placementRadius * sin(buffer * k),
+                                        velCm.x + (debrisVelocity * cos(buffer * k)),
+                                        velCm.y + (debrisVelocity * sin(buffer * k)),
+                                        debrisRadius);
                 }
-                bodies[i].setMass(0.);
-                bodies[j].setMass(0.);
-                bodies[i].setRadius(0.);
-                bodies[j].setRadius(0.);
-                merged = true;
+                bodies[major].position = ((bodies[i].position * bodies[i].getMass()) + (bodies[j].position * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
+                bodies[major].velocity = ((bodies[i].velocity * bodies[i].getMass()) + (bodies[j].velocity * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
+                bodies[minor].setMass(0.);
+                bodies[minor].setRadius(0.);
+                collision = true;
             }
-            if ((bodies[i].position - bodies[j].position).module() <= (bodies[i].getRadius() + bodies[j].getRadius()))
+            else
             {
-                bodies[j].position = ((bodies[i].position * bodies[i].getMass()) + (bodies[j].position * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
-                bodies[j].velocity = ((bodies[i].velocity * bodies[i].getMass()) + (bodies[j].velocity * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
-                bodies[j].setMass(bodies[j].getMass() + bodies[i].getMass());
-                bodies[j].setRadius(cbrt(pow(bodies[j].getRadius(), 3) + pow(bodies[i].getRadius(), 3))); // New radius, assuming all the bodies have equal density.
-                bodies[i].setMass(0.);
-                bodies[i].setRadius(0.);
-                merged = true;
+                if ((bodies[i].position - bodies[j].position).module() <= (bodies[i].getRadius() + bodies[j].getRadius()))
+                //urto con velRelativa<velFuga, allora urto anelastico in cui i due corpi si uniscono.
+                {
+                    bodies[j].position = ((bodies[i].position * bodies[i].getMass()) + (bodies[j].position * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
+                    bodies[j].velocity = ((bodies[i].velocity * bodies[i].getMass()) + (bodies[j].velocity * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
+                    bodies[j].setMass(bodies[j].getMass() + bodies[i].getMass());
+                    bodies[j].setRadius(cbrt(pow(bodies[j].getRadius(), 3) + pow(bodies[i].getRadius(), 3))); // New radius, assuming all the bodies have equal density.
+                    bodies[i].setMass(0.);
+                    bodies[i].setRadius(0.);
+                    collision = true;
+                }
             }
         }
     }
@@ -191,12 +220,12 @@ void Simulation::step(double dt)
                                 [](const Planet &p)
                                 { return p.getMass() == 0.0; }),
                  bodies.end());
-
-    if (totalMass() != totalMassUnmerged) // Si attiva solo se 3 o più corpi si toccano nello stesso momento, e l'algoritmo di "trasferimento massa" si romperebbe.
+    double epsilon = 1e-7 * totalMassUnmerged; // Tolleranza per gli errori di arrotondamento
+    if (std::abs(totalMass() - totalMassUnmerged) > epsilon) // Si attiva solo se 3 o più corpi si toccano nello stesso momento, e l'algoritmo di "trasferimento massa" si romperebbe.
     {
         throw std::runtime_error("Ci sono state delle collisioni con più di due corpi in contemporanea, non calcolabili da questo programma.");
     }
-    if (merged)
+    if (collision)
     {
         initAccelerations();
     }
