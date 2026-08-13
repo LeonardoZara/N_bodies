@@ -7,7 +7,7 @@
 #include <limits>
 #include <algorithm>
 #include "vicktor.hpp"
-
+namespace nb{
 class Planet
 {
     double mass;
@@ -84,9 +84,10 @@ public:
     double consAngularMomentum() const;
     Vicktor consMomentum() const;
     void initAccelerations();
-    bool explosiveCollision(int i, int j) const;
+    bool explosiveCollision(long unsigned int i, long unsigned int j) const;
     void step(double dt);
     Vicktor lagrange(int i) const;
 };
+}
 
 #endif

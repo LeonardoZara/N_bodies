@@ -12,21 +12,21 @@
 
 TEST_CASE("Vicktor: basic operations")
 {
-    Vicktor a{3.0, 4.0};
-    Vicktor b{1.0, 2.0};
+    nb::Vicktor a{3.0, 4.0};
+    nb::Vicktor b{1.0, 2.0};
 
     SUBCASE("sum"){
-        Vicktor c = a + b; 
+        nb::Vicktor c = a + b; 
         CHECK(c.x == doctest::Approx(4.0));
         CHECK(c.y == doctest::Approx(6.0));
     }
     SUBCASE("subtraction"){
-        Vicktor d = a - b;
+        nb::Vicktor d = a - b;
         CHECK(d.x == doctest::Approx(2.0));
         CHECK(d.y == doctest::Approx(2.0));
     }
     SUBCASE("scalar multiplication"){
-        Vicktor c = a*2;
+        nb::Vicktor c = a*2;
         CHECK(c.x == doctest::Approx(6.0));
         CHECK(c.y == doctest::Approx(8.0));
     }
@@ -36,19 +36,19 @@ TEST_CASE("Vicktor: basic operations")
 }
 TEST_CASE("Vicktor: exceptions"){
         SUBCASE("null vector's module is zero"){
-            Vicktor null{0.0, 0.0};
+            nb::Vicktor null{0.0, 0.0};
             CHECK(null.module() == doctest::Approx(0.0));
         }
         SUBCASE("multiplication by zero"){
-            Vicktor a{2.0 ,4.0};
-            Vicktor c = a*0;
+            nb::Vicktor a{2.0 ,4.0};
+            nb::Vicktor c = a*0;
             CHECK(c.x == doctest::Approx(0.0));
             CHECK(c.y == doctest::Approx(0.0));
 
         }
         SUBCASE("subtracting a vector from itself") {
-            Vicktor a{3.0,4.0};
-            Vicktor c = a-a;
+            nb::Vicktor a{3.0,4.0};
+            nb::Vicktor c = a-a;
             CHECK(c.x == doctest::Approx(0.0));
             CHECK(c.y == doctest::Approx(0.0));
         }
@@ -56,7 +56,7 @@ TEST_CASE("Vicktor: exceptions"){
 
 TEST_CASE("Planet")
 {
-    Planet p(5.0, 1.0, 2.0, 0.5, -0.5, 0.1);
+    nb::Planet p(5.0, 1.0, 2.0, 0.5, -0.5, 0.1);
 
     CHECK(p.getMass() == doctest::Approx(5.0));
     CHECK(p.getRadius() == doctest::Approx(0.1));
@@ -72,7 +72,7 @@ TEST_CASE("Planet")
 
 TEST_CASE("Simulation::totalMass")
 {
-    Simulation sim;
+    nb::Simulation sim;
     sim.bodies.emplace_back(10.0, 0.0, 0.0, 0.0, 0.0, 1.0);
     sim.bodies.emplace_back(20.0, 5.0, 0.0, 0.0, 0.0, 1.0);
     sim.bodies.emplace_back(5.0, -5.0, 0.0, 0.0, 0.0, 1.0);
@@ -82,22 +82,22 @@ TEST_CASE("Simulation::totalMass")
 
 TEST_CASE("Simulation::centreOfMass - simmetric system")
 {
-    Simulation sim;
+    nb::Simulation sim;
     sim.bodies.emplace_back(1.0, -1.0, 0.0, 0.0, 0.0, 0.1);
     sim.bodies.emplace_back(1.0, 1.0, 0.0, 0.0, 0.0, 0.1);
 
-    Vicktor cm = sim.centreOfMass();
+    nb::Vicktor cm = sim.centreOfMass();
     CHECK(cm.x == doctest::Approx(0.0));
     CHECK(cm.y == doctest::Approx(0.0));
 }
 
 TEST_CASE("Simulation::consMomentum e consEnergy - still bodies")
 {
-    Simulation sim;
+    nb::Simulation sim;
     sim.bodies.emplace_back(10.0, 0.0, 0.0, 0.0, 0.0, 1.0);
     sim.bodies.emplace_back(10.0, 5.0, 0.0, 0.0, 0.0, 1.0);
 
-    Vicktor p = sim.consMomentum();
+    nb::Vicktor p = sim.consMomentum();
     CHECK(p.x == doctest::Approx(0.0));
     CHECK(p.y == doctest::Approx(0.0));
 
@@ -108,7 +108,7 @@ TEST_CASE("Simulation::consMomentum e consEnergy - still bodies")
 
 TEST_CASE("Simulation::step - one body moving with constant velocity")
 {
-    Simulation sim;
+    nb::Simulation sim;
     sim.bodies.emplace_back(1.0, 0.0, 0.0, 2.0, 3.0, 0.1);
     sim.initAccelerations(); // no other body. null acceleration
 
@@ -122,7 +122,7 @@ TEST_CASE("Simulation::step - one body moving with constant velocity")
 
 TEST_CASE("Simulation::step - elliptical orbit")
 {
-    Simulation sim;
+    nb::Simulation sim;
     // Sole
     sim.bodies.emplace_back(1.989e30, 0.0, 0.0, 0.0, -0.154894, 6.96e8);
     // Pianeta in orbita ellittica
@@ -156,7 +156,7 @@ TEST_CASE("Simulation::step - elliptical orbit")
 
 TEST_CASE("Simulation::step - merged bodies")
 {
-    Simulation sim;
+    nb::Simulation sim;
     sim.bodies.emplace_back(1.0, 0.0, 0.0, 0.0, 0.0, 5.0);
     sim.bodies.emplace_back(1.0, 1.0, 0.0, 0.0, 0.0, 5.0);
     sim.initAccelerations();

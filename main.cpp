@@ -9,7 +9,7 @@
 
 int main()
 {
-  Simulation sim;
+  nb::Simulation sim;
 
   try
   {
@@ -21,12 +21,7 @@ int main()
     return EXIT_FAILURE;
   }
 
-  /*if (sim.bodies.size() == 2) // visualizzazione dei punti di lagrange, come se fossero corpi con massa 0.1 kg)
-  {
-    sim.bodies.emplace_back(0.1, sim.lagrange(3).x, sim.lagrange(3).y, 0., 0., 1);
-    sim.bodies.emplace_back(0.1, sim.lagrange(4).x, sim.lagrange(4).y, 0., 0., 1);
-  }
-*/
+ 
   sim.initAccelerations();
 
   // Calculating initial energy and momentums.
@@ -73,7 +68,7 @@ int main()
 
   // aggiustare le scie per lo zoom: le facciamo con l'array invece che il fade rectangle
   const size_t trailLength = 3000; // Lunghezza della scia (numero di punti memorizzati)
-  std::vector<std::deque<sf::Vector2f>> trails(sim.bodies.size());
+  std::vector<std::deque<sf::Vector2<double>>> trails(sim.bodies.size());
 
   // Mappatura raggio -> raggio grafico.
   const double r_min = 2.4397e6;   // raggio di Mercurio
@@ -83,7 +78,7 @@ int main()
   const double logMin = std::log10(r_min);
   const double logMax = std::log10(r_max);
 
-  auto radiusToRadius = [&](double radius) -> float
+  auto radiusToRadius = [&](double radius) -> double
   {
     if (radius == 0.0) //di sicurezza
     {
@@ -103,7 +98,7 @@ int main()
 
   //Imposta la corretta scala di zoom inziale in base al corpo più lontano dall'origine.
   double maxInitialDist{0.};
-  maxInitialDist = (*std::max_element(sim.bodies.begin(), sim.bodies.end(), [](const Planet &a, const Planet &b)
+  maxInitialDist = (*std::max_element(sim.bodies.begin(), sim.bodies.end(), [](const nb::Planet &a, const nb::Planet &b)
                                       { return a.position.module() < b.position.module(); }))
                        .position.module();
   double scale = 1.0;
@@ -171,7 +166,7 @@ int main()
     // Se il numero di corpi è cambiato (collisione), resetta tutte le scie
     if (trails.size() != sim.bodies.size())
     {
-        trails.assign(sim.bodies.size(), std::deque<sf::Vector2f>());
+        trails.assign(sim.bodies.size(), std::deque<sf::Vector2<double>>());
     }
     window.clear(sf::Color::Black);
 
@@ -182,7 +177,7 @@ int main()
 
       // qui calcoliamo le scie
       //  Salviamo la posizione fisica (non i pixel) nella coda
-      trails[i].push_back(sf::Vector2f(body.position.x, body.position.y));
+      trails[i].push_back(sf::Vector2<double>(body.position.x, body.position.y));
       if (trails[i].size() > trailLength)
       {
         trails[i].pop_front();
@@ -195,7 +190,7 @@ int main()
         double trailScreenX = (windowWidth / 2) + trails[i][j].x * scale;
         double trailScreenY = (windowHeight / 2) + trails[i][j].y * scale;
 
-        trailLine[j].position = sf::Vector2f(trailScreenX, trailScreenY);
+        trailLine[j].position = sf::Vector2f(static_cast<float>(trailScreenX),static_cast<float>(trailScreenY));
 
         // Trasparenza progressiva: più il punto è vecchio, più è trasparente
         sf::Uint8 alpha = static_cast<sf::Uint8>((255 * j) / trails[i].size());
@@ -203,15 +198,15 @@ int main()
       }
       window.draw(trailLine);
 
-      float finalRadius = radiusToRadius(body.getRadius());
+      double finalRadius = radiusToRadius(body.getRadius());
 
-      sf::CircleShape circle(finalRadius);
+      sf::CircleShape circle(static_cast<float>(finalRadius));
       circle.setFillColor(bodyColor);
-      circle.setOrigin(finalRadius, finalRadius); // centra il cerchio sul punto
+      circle.setOrigin(static_cast<float>(finalRadius),static_cast<float>(finalRadius)); // centra il cerchio sul punto
 
       double screenX = (windowWidth/2) + body.position.x * scale;
       double screenY = (windowHeight/2) + body.position.y * scale;
-      circle.setPosition(screenX, screenY);
+      circle.setPosition(static_cast<float>(screenX), static_cast<float>(screenY));
 
       window.draw(circle);
     }

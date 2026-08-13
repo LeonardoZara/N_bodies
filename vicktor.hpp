@@ -1,6 +1,7 @@
 #ifndef VICKTOR_HPP
 #define VICKTOR_HPP
 
+namespace nb{
 struct Vicktor
 {
     double x{};
@@ -12,5 +13,5 @@ struct Vicktor
     Vicktor &operator+=(const Vicktor &q);
     double module() const;
 };
-
+}
 #endif

@@ -1,6 +1,7 @@
 #include <cmath>
 #include "vicktor.hpp"
 
+namespace nb{
 Vicktor Vicktor::operator+(const Vicktor &q) const
 {
     return {x + q.x, y + q.y};
@@ -23,4 +24,5 @@ Vicktor &Vicktor::operator+=(const Vicktor &q)
 double Vicktor::module() const
 {
     return sqrt(x * x + y * y);
+}
 }
