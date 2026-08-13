@@ -6,6 +6,7 @@
 #include <string>
 #include <limits>
 #include <algorithm>
+#include <random>
 #include "vector2d.hpp"
 namespace nb
 {
@@ -73,6 +74,8 @@ namespace nb
     {
         static constexpr double G{6.6743e-11};
         static constexpr double pi = 3.14159265358979323846;
+        std::default_random_engine eng;
+        std::uniform_real_distribution<int> uniform{2, 6};
         std::vector<Planet> bodies;
 
     public:

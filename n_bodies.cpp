@@ -191,7 +191,7 @@ namespace nb
                     Vector2d posCm = ((bodies[i].position * bodies[i].getMass()) + (bodies[j].position * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
                     Vector2d velCm = ((bodies[i].velocity * bodies[i].getMass()) + (bodies[j].velocity * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
                     double placementRadius = bodies[i].getRadius() + bodies[j].getRadius();
-                    int debrisNumber{6 + 2 * static_cast<int>(((bodies[i].velocity - bodies[j].velocity).module() / sqrt(2 * G * bodies[major].getMass() / bodies[major].getRadius())) - 1)};
+                    int debrisNumber{2 * uniform(eng)};
                     double debrisRadius = bodies[minor].getRadius() * cbrt(1. / debrisNumber);
                     double debrisVelocity = (bodies[i].velocity - bodies[j].velocity).module() * sqrt(bodies[major].getMass() / (bodies[major].getMass() + bodies[minor].getMass()));
                     double buffer = pi / (debrisNumber / 2);
