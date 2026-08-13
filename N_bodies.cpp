@@ -52,6 +52,11 @@ void Simulation::loadFromFile(const std::string &filename)
         throw std::runtime_error("Nessun corpo caricato dal file: " + filename);
 }
 
+void Simulation::addBody(double m, double posx, double posy, double velx, double vely, double r)
+{
+    bodies.emplace_back(m, posx, posy, velx, vely, r);
+}
+
 static Vicktor gravAcceleration(const std::vector<Planet> &bodies, size_t i, double G)
 {
     Vicktor acc{};

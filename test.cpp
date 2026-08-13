@@ -73,9 +73,9 @@ TEST_CASE("Planet")
 TEST_CASE("Simulation::totalMass")
 {
     nb::Simulation sim;
-    sim.bodies.emplace_back(10.0, 0.0, 0.0, 0.0, 0.0, 1.0);
-    sim.bodies.emplace_back(20.0, 5.0, 0.0, 0.0, 0.0, 1.0);
-    sim.bodies.emplace_back(5.0, -5.0, 0.0, 0.0, 0.0, 1.0);
+    sim.addBody(10.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+    sim.addBody(20.0, 5.0, 0.0, 0.0, 0.0, 1.0);
+    sim.addBody(5.0, -5.0, 0.0, 0.0, 0.0, 1.0);
 
     CHECK(sim.totalMass() == doctest::Approx(35.0));
 }
@@ -83,8 +83,8 @@ TEST_CASE("Simulation::totalMass")
 TEST_CASE("Simulation::centreOfMass - simmetric system")
 {
     nb::Simulation sim;
-    sim.bodies.emplace_back(1.0, -1.0, 0.0, 0.0, 0.0, 0.1);
-    sim.bodies.emplace_back(1.0, 1.0, 0.0, 0.0, 0.0, 0.1);
+    sim.addBody(1.0, -1.0, 0.0, 0.0, 0.0, 0.1);
+    sim.addBody(1.0, 1.0, 0.0, 0.0, 0.0, 0.1);
 
     nb::Vicktor cm = sim.centreOfMass();
     CHECK(cm.x == doctest::Approx(0.0));
@@ -94,8 +94,8 @@ TEST_CASE("Simulation::centreOfMass - simmetric system")
 TEST_CASE("Simulation::consMomentum e consEnergy - still bodies")
 {
     nb::Simulation sim;
-    sim.bodies.emplace_back(10.0, 0.0, 0.0, 0.0, 0.0, 1.0);
-    sim.bodies.emplace_back(10.0, 5.0, 0.0, 0.0, 0.0, 1.0);
+    sim.addBody(10.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+    sim.addBody(10.0, 5.0, 0.0, 0.0, 0.0, 1.0);
 
     nb::Vicktor p = sim.consMomentum();
     CHECK(p.x == doctest::Approx(0.0));
@@ -109,24 +109,24 @@ TEST_CASE("Simulation::consMomentum e consEnergy - still bodies")
 TEST_CASE("Simulation::step - one body moving with constant velocity")
 {
     nb::Simulation sim;
-    sim.bodies.emplace_back(1.0, 0.0, 0.0, 2.0, 3.0, 0.1);
+    sim.addBody(1.0, 0.0, 0.0, 2.0, 3.0, 0.1);
     sim.initAccelerations(); // no other body. null acceleration
 
     sim.step(10.0); // dt = 10 s
 
-    CHECK(sim.bodies[0].position.x == doctest::Approx(20.0));
-    CHECK(sim.bodies[0].position.y == doctest::Approx(30.0));
-    CHECK(sim.bodies[0].velocity.x == doctest::Approx(2.0));
-    CHECK(sim.bodies[0].velocity.y == doctest::Approx(3.0));
+    CHECK(sim.getBody(0).position.x == doctest::Approx(20.0));
+    CHECK(sim.getBody(0).position.y == doctest::Approx(30.0));
+    CHECK(sim.getBody(0).velocity.x == doctest::Approx(2.0));
+    CHECK(sim.getBody(0).velocity.y == doctest::Approx(3.0));
 }
 
 TEST_CASE("Simulation::step - elliptical orbit")
 {
     nb::Simulation sim;
     // Sole
-    sim.bodies.emplace_back(1.989e30, 0.0, 0.0, 0.0, -0.154894, 6.96e8);
+    sim.addBody(1.989e30, 0.0, 0.0, 0.0, -0.154894, 6.96e8);
     // Pianeta in orbita ellittica
-    sim.bodies.emplace_back(5.972e24, 7.48e10, 0.0, 0.0, 51588.2, 6.371e6);
+    sim.addBody(5.972e24, 7.48e10, 0.0, 0.0, 51588.2, 6.371e6);
     
     sim.initAccelerations();
 
@@ -157,15 +157,15 @@ TEST_CASE("Simulation::step - elliptical orbit")
 TEST_CASE("Simulation::step - merged bodies")
 {
     nb::Simulation sim;
-    sim.bodies.emplace_back(1.0, 0.0, 0.0, 0.0, 0.0, 5.0);
-    sim.bodies.emplace_back(1.0, 1.0, 0.0, 0.0, 0.0, 5.0);
+    sim.addBody(1.0, 0.0, 0.0, 0.0, 0.0, 5.0);
+    sim.addBody(1.0, 1.0, 0.0, 0.0, 0.0, 5.0);
     sim.initAccelerations();
 
-    REQUIRE(sim.bodies.size() == 2);
+    REQUIRE(sim.numBodies() == 2);
     sim.step(1.0);
 
-    CHECK(sim.bodies.size() == 1);// bodies merged
-    CHECK(sim.bodies[0].getMass() == doctest::Approx(2.0));
+    CHECK(sim.numBodies() == 1);// bodies merged
+    CHECK(sim.getBody(0).getMass() == doctest::Approx(2.0));
 }
 
 

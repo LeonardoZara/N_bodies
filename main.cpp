@@ -68,7 +68,7 @@ int main()
 
   // aggiustare le scie per lo zoom: le facciamo con l'array invece che il fade rectangle
   const size_t trailLength = 3000; // Lunghezza della scia (numero di punti memorizzati)
-  std::vector<std::deque<sf::Vector2<double>>> trails(sim.bodies.size());
+  std::vector<std::deque<sf::Vector2<double>>> trails(sim.numBodies());
 
   // Mappatura raggio -> raggio grafico.
   const double r_min = 2.4397e6;   // raggio di Mercurio
@@ -98,7 +98,7 @@ int main()
 
   //Imposta la corretta scala di zoom inziale in base al corpo più lontano dall'origine.
   double maxInitialDist{0.};
-  maxInitialDist = (*std::max_element(sim.bodies.begin(), sim.bodies.end(), [](const nb::Planet &a, const nb::Planet &b)
+  maxInitialDist = (*std::max_element(sim.begin(), sim.end(), [](const nb::Planet &a, const nb::Planet &b)
                                       { return a.position.module() < b.position.module(); }))
                        .position.module();
   double scale = 1.0;
@@ -164,15 +164,15 @@ int main()
     }
 
     // Se il numero di corpi è cambiato (collisione), resetta tutte le scie
-    if (trails.size() != sim.bodies.size())
+    if (trails.size() != sim.numBodies())
     {
-        trails.assign(sim.bodies.size(), std::deque<sf::Vector2<double>>());
+        trails.assign(sim.numBodies(), std::deque<sf::Vector2<double>>());
     }
     window.clear(sf::Color::Black);
 
-    for (size_t i = 0; i < sim.bodies.size(); ++i)
+    for (size_t i = 0; i < sim.numBodies(); ++i)
     {
-      auto &body = sim.bodies[i];
+      auto &body = sim.getBody(i);
       sf::Color bodyColor = palette[i % palette.size()];
 
       // qui calcoliamo le scie
@@ -222,7 +222,7 @@ int main()
     oss << "Current Mechanical Energy: " << currentEnergy << " J\n";
     oss << "Current Momentum: " << currentMomentum << " kg*m/s\n";
     oss << "Current Angular Momentum:  " << currentAngMomentum << " kg*m^2/s\n";
-    oss << "Current number of bodies: " << sim.bodies.size() << '\n';
+    oss << "Current number of bodies: " << sim.numBodies() << '\n';
 
     // Assegna la stringa creata al testo e disegnalo
     legendText.setString(oss.str());
