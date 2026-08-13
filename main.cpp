@@ -72,7 +72,7 @@ int main()
   instructionsText.setPosition(10.f, 650.f);
 
   // aggiustare le scie per lo zoom: le facciamo con l'array invece che il fade rectangle
-  const size_t trailLength = 1000; // Lunghezza della scia (numero di punti memorizzati)
+  const size_t trailLength = 3000; // Lunghezza della scia (numero di punti memorizzati)
   std::vector<std::deque<sf::Vector2f>> trails(sim.bodies.size());
 
   // Mappatura raggio -> raggio grafico.
@@ -118,7 +118,7 @@ int main()
   const double dtMax = 21600.0;
   int subSteps = 15;
   const int minSubSteps = 1;
-  const int maxSubSteps = 30;
+  const int maxSubSteps = 100;
 
   try
   {

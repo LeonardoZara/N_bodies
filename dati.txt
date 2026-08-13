@@ -15,6 +15,10 @@
 #5.683e26     1.432e12      0.0     0.0         9680.0      5.8232e7
 #8.681e25     2.867e12      0.0     0.0         6800.0      2.5362e7
 #1.024e26     4.515e12      0.0     0.0         5430.0      2.4622e7
+# Luna
+#7.342e22     1.499844e11   0.0          0.0        30802.0    1.737e6
+# Plutone
+#1.303e22     5.906e12      0.0          0.0        4740.0     1.188e6
 #
 # test scontro lento, quindi senza detriti. Due terre
 #5.972e24     -5.0e9      0.0        0.0     0.0        6.371e6
@@ -31,3 +35,18 @@
 # test scontro con detriti terra - luna
 #5.972e24     0.0         0.0        0.0        0.0        6.371e6
 #7.342e22     0.0         5.0e9      0.0       -14000.0    1.737e6
+#
+# test scontro con detriti, 3 corpi, le collisioni cambiano in base al dt.
+# Stella (Sole)
+#1.989e30     0.0        -1.5e9      0.0        0.0        6.963e8
+# Pianeta 1 (Terra)
+#5.972e24    -5.0e7       0.0        15000.0    0.0        6.371e6
+# Pianeta 2 (Terra)
+#5.972e24     5.0e7       0.0       -15000.0    0.0        6.371e6
+#test scontro con 3 corpi, le collsioni cambiano in base al dt.
+# Stella 
+4.0e30       0.0         0.0        0.0        0.0        6.963e8
+# Pianeta 1 (Dall'alto a destra, punta in basso a sinistra)
+5.972e24     1.5e9       5.0e7     -70000.0   -10000.0    6.371e6
+# Pianeta 2 (Dal basso a destra, punta in alto a sinistra)
+5.972e24     1.5e9      -5.0e7     -70000.0    10000.0    6.371e6
