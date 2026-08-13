@@ -97,7 +97,6 @@ namespace nb
         void initAccelerations();
         bool explosiveCollision(long unsigned int i, long unsigned int j) const;
         void step(double dt);
-        Vector2d lagrange(int i) const;
     };
 }
 

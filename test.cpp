@@ -167,3 +167,55 @@ TEST_CASE("Simulation::step - merged bodies")
     CHECK(sim.numBodies() == 1);// bodies merged
     CHECK(sim.getBody(0).getMass() == doctest::Approx(2.0));
 }
+
+TEST_CASE("Simulation::step - collision with no debris")
+{
+    nb::Simulation sim;
+    sim.addBody(1.0e20, -50.0, 0.0, 5.0, 0.0, 30.0);
+    sim.addBody(1.0e20,  50.0, 0.0, -5.0, 0.0, 30.0);
+    sim.initAccelerations();
+
+    double initialMass = sim.totalMass();
+    nb::Vector2d initialMomentum = sim.consMomentum();
+
+    REQUIRE(sim.numBodies() == 2);
+    // dt=10s
+    sim.step(10.0); 
+    CHECK(sim.numBodies() == 1);
+    
+    // mass conservation
+    CHECK(sim.getBody(0).getMass() == doctest::Approx(initialMass));
+    
+    // momentum conservation
+    nb::Vector2d finalMomentum = sim.consMomentum();
+    CHECK(finalMomentum.x == doctest::Approx(initialMomentum.x).epsilon(0.001));
+    CHECK(finalMomentum.y == doctest::Approx(initialMomentum.y).epsilon(0.001));
+    
+    // final body must stop at the centre.
+    CHECK(sim.getBody(0).velocity.module() == doctest::Approx(0.0));
+}
+
+TEST_CASE("Simulation::step - explosive collision with debris")
+{
+    nb::Simulation sim;
+    sim.addBody(5.0e24, -20.0, 0.0, 100000.0, 0.0, 10.0); 
+    sim.addBody(1.0e24,  20.0, 0.0, -100000.0, 0.0, 10.0); 
+    sim.initAccelerations();
+
+    double initialMass = sim.totalMass();
+    nb::Vector2d initialMomentum = sim.consMomentum();
+
+    REQUIRE(sim.numBodies() == 2);
+    
+    sim.step(0.0002); // dt piccolo per innescare solo il contatto
+
+    CHECK(sim.numBodies() >= 3);
+    
+    // mass conservation
+    CHECK(sim.totalMass() == doctest::Approx(initialMass).epsilon(0.0001));
+
+    // momentum conservation
+    nb::Vector2d finalMomentum = sim.consMomentum();
+    CHECK(finalMomentum.x == doctest::Approx(initialMomentum.x).epsilon(0.001));
+    CHECK(finalMomentum.y == doctest::Approx(initialMomentum.y).epsilon(0.001));
+}
