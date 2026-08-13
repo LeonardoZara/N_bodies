@@ -167,7 +167,3 @@ TEST_CASE("Simulation::step - merged bodies")
     CHECK(sim.numBodies() == 1);// bodies merged
     CHECK(sim.getBody(0).getMass() == doctest::Approx(2.0));
 }
-
-
-
-
