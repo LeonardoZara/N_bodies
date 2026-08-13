@@ -5,28 +5,28 @@
 #include <string>
 #include <vector>
 #include "doctest.h"
-#include "vicktor.hpp"
-#include "N_bodies.hpp"
+#include "vector2d.hpp"
+#include "n_bodies.hpp"
 
 
 
-TEST_CASE("Vicktor: basic operations")
+TEST_CASE("Vector2d: basic operations")
 {
-    nb::Vicktor a{3.0, 4.0};
-    nb::Vicktor b{1.0, 2.0};
+    nb::Vector2d a{3.0, 4.0};
+    nb::Vector2d b{1.0, 2.0};
 
     SUBCASE("sum"){
-        nb::Vicktor c = a + b; 
+        nb::Vector2d c = a + b; 
         CHECK(c.x == doctest::Approx(4.0));
         CHECK(c.y == doctest::Approx(6.0));
     }
     SUBCASE("subtraction"){
-        nb::Vicktor d = a - b;
+        nb::Vector2d d = a - b;
         CHECK(d.x == doctest::Approx(2.0));
         CHECK(d.y == doctest::Approx(2.0));
     }
     SUBCASE("scalar multiplication"){
-        nb::Vicktor c = a*2;
+        nb::Vector2d c = a*2;
         CHECK(c.x == doctest::Approx(6.0));
         CHECK(c.y == doctest::Approx(8.0));
     }
@@ -34,21 +34,21 @@ TEST_CASE("Vicktor: basic operations")
         CHECK(a.module() == doctest::Approx(5.0));
     }
 }
-TEST_CASE("Vicktor: exceptions"){
+TEST_CASE("Vector2d: exceptions"){
         SUBCASE("null vector's module is zero"){
-            nb::Vicktor null{0.0, 0.0};
+            nb::Vector2d null{0.0, 0.0};
             CHECK(null.module() == doctest::Approx(0.0));
         }
         SUBCASE("multiplication by zero"){
-            nb::Vicktor a{2.0 ,4.0};
-            nb::Vicktor c = a*0;
+            nb::Vector2d a{2.0 ,4.0};
+            nb::Vector2d c = a*0;
             CHECK(c.x == doctest::Approx(0.0));
             CHECK(c.y == doctest::Approx(0.0));
 
         }
         SUBCASE("subtracting a vector from itself") {
-            nb::Vicktor a{3.0,4.0};
-            nb::Vicktor c = a-a;
+            nb::Vector2d a{3.0,4.0};
+            nb::Vector2d c = a-a;
             CHECK(c.x == doctest::Approx(0.0));
             CHECK(c.y == doctest::Approx(0.0));
         }
@@ -86,7 +86,7 @@ TEST_CASE("Simulation::centreOfMass - simmetric system")
     sim.addBody(1.0, -1.0, 0.0, 0.0, 0.0, 0.1);
     sim.addBody(1.0, 1.0, 0.0, 0.0, 0.0, 0.1);
 
-    nb::Vicktor cm = sim.centreOfMass();
+    nb::Vector2d cm = sim.centreOfMass();
     CHECK(cm.x == doctest::Approx(0.0));
     CHECK(cm.y == doctest::Approx(0.0));
 }
@@ -97,7 +97,7 @@ TEST_CASE("Simulation::consMomentum e consEnergy - still bodies")
     sim.addBody(10.0, 0.0, 0.0, 0.0, 0.0, 1.0);
     sim.addBody(10.0, 5.0, 0.0, 0.0, 0.0, 1.0);
 
-    nb::Vicktor p = sim.consMomentum();
+    nb::Vector2d p = sim.consMomentum();
     CHECK(p.x == doctest::Approx(0.0));
     CHECK(p.y == doctest::Approx(0.0));
 

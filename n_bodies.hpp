@@ -6,7 +6,7 @@
 #include <string>
 #include <limits>
 #include <algorithm>
-#include "vicktor.hpp"
+#include "vector2d.hpp"
 namespace nb
 {
     class Planet
@@ -15,9 +15,9 @@ namespace nb
         double radius;
 
     public:
-        Vicktor position;
-        Vicktor velocity;
-        Vicktor acceleration;
+        Vector2d position;
+        Vector2d velocity;
+        Vector2d acceleration;
         Planet(double m, double posx, double posy, double velx, double vely, double r, double accex = 0.0, double accey = 0.0)
             : mass(m), radius(r)
         {
@@ -87,14 +87,14 @@ namespace nb
         std::vector<Planet>::const_iterator end() const { return bodies.cend(); }
 
         double consEnergy() const;
-        Vicktor centreOfMass() const;
+        Vector2d centreOfMass() const;
         double totalMass() const;
         double consAngularMomentum() const;
-        Vicktor consMomentum() const;
+        Vector2d consMomentum() const;
         void initAccelerations();
         bool explosiveCollision(long unsigned int i, long unsigned int j) const;
         void step(double dt);
-        Vicktor lagrange(int i) const;
+        Vector2d lagrange(int i) const;
     };
 }
 

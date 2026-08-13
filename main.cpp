@@ -4,8 +4,8 @@
 #include <sstream>
 #include <iomanip>
 #include <cmath>
-#include <deque> //per generare le scie
-#include "N_bodies.hpp"
+#include <deque>
+#include "n_bodies.hpp"
 
 int main()
 {
@@ -21,17 +21,15 @@ int main()
     return EXIT_FAILURE;
   }
 
- 
   sim.initAccelerations();
 
-  // Calculating initial energy and momentums.
   sim.energyRange.update(sim.consEnergy());
   sim.angularMomentumRange.update(sim.consAngularMomentum());
   sim.momentumRange.update(sim.consMomentum().module());
 
   constexpr unsigned int windowWidth = 800;
   constexpr unsigned int windowHeight = 800;
-  constexpr float screenMargin = 10.f; // Margine in pixel per non far toccare inizialmente i pianeti sul bordo.
+  constexpr float screenMargin = 10.f;
 
   sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "N-Body Simulation");
   window.setPosition(sf::Vector2i(50, 50));
@@ -47,11 +45,10 @@ int main()
       sf::Color::Magenta,
       sf::Color::Cyan};
 
-  // Cose per la legenda:
   sf::Font font;
-  if (!font.loadFromFile("font.ttf"))
+  if (!font.loadFromFile("open_sans.ttf"))
   {
-    std::cerr << "Errore: impossibile caricare il font.ttf!\n";
+    std::cerr << "Errore: impossibile caricare il open_sans.ttf!\n";
     return EXIT_FAILURE;
   }
 
@@ -66,12 +63,11 @@ int main()
   instructionsText.setFillColor(sf::Color::White);
   instructionsText.setPosition(10.f, 650.f);
 
-  // aggiustare le scie per lo zoom: le facciamo con l'array invece che il fade rectangle
   const size_t trailLength = 3000; // Lunghezza della scia (numero di punti memorizzati)
   std::vector<std::deque<sf::Vector2<double>>> trails(sim.numBodies());
 
   // Mappatura raggio -> raggio grafico.
-  const double r_min = 2.4397e6;   // raggio di Mercurio
+  const double r_min = 2.4397e6; // raggio di Mercurio
   const double r_max = 6.9634e8; // raggio del Sole
   const float graphic_min = 2.0f;
   const float graphic_max = 10.0f;
@@ -80,9 +76,9 @@ int main()
 
   auto radiusToRadius = [&](double radius) -> double
   {
-    if (radius == 0.0) //di sicurezza
+    if (radius == 0.0)
     {
-        return 0.0f;
+      return 0.0f;
     }
     if (radius <= r_min)
     {
@@ -96,7 +92,7 @@ int main()
     return graphic_min + static_cast<float>(t * (graphic_max - graphic_min));
   };
 
-  //Imposta la corretta scala di zoom inziale in base al corpo più lontano dall'origine.
+  // Imposta la corretta scala di zoom inziale in base al corpo più lontano dall'origine.
   double maxInitialDist{0.};
   maxInitialDist = (*std::max_element(sim.begin(), sim.end(), [](const nb::Planet &a, const nb::Planet &b)
                                       { return a.position.module() < b.position.module(); }))
@@ -107,147 +103,146 @@ int main()
     scale = ((windowWidth / 2.0) - screenMargin) / maxInitialDist;
   }
 
-
   double dt = 60.0;
   const double dtMin = 0.01;
   const double dtMax = 21600.0;
-  int subSteps = 15;
+  int subSteps = 50;
   const int minSubSteps = 1;
   const int maxSubSteps = 100;
 
   try
   {
-  while (window.isOpen())
-  {
-    sf::Event event;
-    while (window.pollEvent(event))
+    while (window.isOpen())
     {
-      if (event.type == sf::Event::Closed)
+      sf::Event event;
+      while (window.pollEvent(event))
       {
-        window.close();
+        if (event.type == sf::Event::Closed)
+        {
+          window.close();
+        }
+
+        if (event.type == sf::Event::MouseWheelScrolled)
+        {
+          if (event.mouseWheelScroll.delta > 0)
+          {
+            scale *= 1.3; // zoom in
+          }
+          else
+          {
+            scale /= 1.3; // zoom out
+          }
+        }
+        if (event.type == sf::Event::KeyPressed)
+        {
+          if (event.key.code == sf::Keyboard::Up)
+          {
+            subSteps = std::min(subSteps + 1, maxSubSteps);
+          }
+          if (event.key.code == sf::Keyboard::Down)
+          {
+            subSteps = std::max(subSteps - 1, minSubSteps);
+          }
+          if (event.key.code == sf::Keyboard::Right)
+          {
+            dt = std::min(dt * 1.2, dtMax);
+          }
+          if (event.key.code == sf::Keyboard::Left)
+          {
+            dt = std::max(dt / 1.2, dtMin);
+          }
+        }
+      }
+      for (int k = 0; k < subSteps; k++)
+      {
+        sim.step(dt);
       }
 
-      if (event.type == sf::Event::MouseWheelScrolled)
+      // Se il numero di corpi è cambiato (collisione), resetta tutte le scie
+      if (trails.size() != sim.numBodies())
       {
-        if (event.mouseWheelScroll.delta > 0)
-        {
-          scale *= 1.3; // zoom in
-        }
-        else
-        {
-          scale /= 1.3; // zoom out
-        }
-      }
-      if (event.type == sf::Event::KeyPressed)
-      {
-        if (event.key.code == sf::Keyboard::Up)
-        {
-          subSteps = std::min(subSteps + 1, maxSubSteps);
-        }
-        if (event.key.code == sf::Keyboard::Down)
-        {
-          subSteps = std::max(subSteps - 1, minSubSteps);
-        }
-        if (event.key.code == sf::Keyboard::Right)
-        {
-          dt = std::min(dt * 1.2, dtMax);
-        }
-        if (event.key.code == sf::Keyboard::Left)
-        {
-          dt = std::max(dt / 1.2, dtMin);
-        }
-      }
-    }
-    for (int k = 0; k < subSteps; k++)
-    {
-      sim.step(dt);
-    }
-
-    // Se il numero di corpi è cambiato (collisione), resetta tutte le scie
-    if (trails.size() != sim.numBodies())
-    {
         trails.assign(sim.numBodies(), std::deque<sf::Vector2<double>>());
-    }
-    window.clear(sf::Color::Black);
+      }
+      window.clear(sf::Color::Black);
 
-    for (size_t i = 0; i < sim.numBodies(); ++i)
-    {
-      auto &body = sim.getBody(i);
-      sf::Color bodyColor = palette[i % palette.size()];
-
-      // qui calcoliamo le scie
-      //  Salviamo la posizione fisica (non i pixel) nella coda
-      trails[i].push_back(sf::Vector2<double>(body.position.x, body.position.y));
-      if (trails[i].size() > trailLength)
+      for (size_t i = 0; i < sim.numBodies(); ++i)
       {
-        trails[i].pop_front();
+        auto &body = sim.getBody(i);
+        sf::Color bodyColor = palette[i % palette.size()];
+
+        // qui calcoliamo le scie
+        //  Salviamo la posizione fisica (non i pixel) nella coda
+        trails[i].push_back(sf::Vector2<double>(body.position.x, body.position.y));
+        if (trails[i].size() > trailLength)
+        {
+          trails[i].pop_front();
+        }
+
+        // Disegniamo la scia applicando la variabile 'scale' in tempo reale (perfetto per lo zoom)
+        sf::VertexArray trailLine(sf::LineStrip, trails[i].size());
+        for (size_t j = 0; j < trails[i].size(); ++j)
+        {
+          double trailScreenX = (windowWidth / 2) + trails[i][j].x * scale;
+          double trailScreenY = (windowHeight / 2) + trails[i][j].y * scale;
+
+          trailLine[j].position = sf::Vector2f(static_cast<float>(trailScreenX), static_cast<float>(trailScreenY));
+
+          // Trasparenza progressiva: più il punto è vecchio, più è trasparente
+          sf::Uint8 alpha = static_cast<sf::Uint8>((255 * j) / trails[i].size());
+          trailLine[j].color = sf::Color(bodyColor.r, bodyColor.g, bodyColor.b, alpha);
+        }
+        window.draw(trailLine);
+
+        double finalRadius = radiusToRadius(body.getRadius());
+
+        sf::CircleShape circle(static_cast<float>(finalRadius));
+        circle.setFillColor(bodyColor);
+        circle.setOrigin(static_cast<float>(finalRadius), static_cast<float>(finalRadius)); // centra il cerchio sul punto
+
+        double screenX = (windowWidth / 2) + body.position.x * scale;
+        double screenY = (windowHeight / 2) + body.position.y * scale;
+        circle.setPosition(static_cast<float>(screenX), static_cast<float>(screenY));
+
+        window.draw(circle);
       }
 
-      // Disegniamo la scia applicando la variabile 'scale' in tempo reale (perfetto per lo zoom)
-      sf::VertexArray trailLine(sf::LineStrip, trails[i].size());
-      for (size_t j = 0; j < trails[i].size(); ++j)
-      {
-        double trailScreenX = (windowWidth / 2) + trails[i][j].x * scale;
-        double trailScreenY = (windowHeight / 2) + trails[i][j].y * scale;
+      // LEGENDE:
+      double currentEnergy = sim.consEnergy();
+      double currentMomentum = sim.consMomentum().module();
+      double currentAngMomentum = sim.consAngularMomentum();
 
-        trailLine[j].position = sf::Vector2f(static_cast<float>(trailScreenX),static_cast<float>(trailScreenY));
+      // Formatta il testo in modo pulito (notazione scientifica per numeri molto grandi/piccoli)
+      std::ostringstream oss;
+      oss << std::scientific << std::setprecision(8); // 8 cifre decimali
+      oss << "Current Mechanical Energy: " << currentEnergy << " J\n";
+      oss << "Current Momentum: " << currentMomentum << " kg*m/s\n";
+      oss << "Current Angular Momentum:  " << currentAngMomentum << " kg*m^2/s\n";
+      oss << "Current number of bodies: " << sim.numBodies() << '\n';
 
-        // Trasparenza progressiva: più il punto è vecchio, più è trasparente
-        sf::Uint8 alpha = static_cast<sf::Uint8>((255 * j) / trails[i].size());
-        trailLine[j].color = sf::Color(bodyColor.r, bodyColor.g, bodyColor.b, alpha);
-      }
-      window.draw(trailLine);
+      // Assegna la stringa creata al testo e disegnalo
+      legendText.setString(oss.str());
 
-      double finalRadius = radiusToRadius(body.getRadius());
+      window.draw(legendText);
 
-      sf::CircleShape circle(static_cast<float>(finalRadius));
-      circle.setFillColor(bodyColor);
-      circle.setOrigin(static_cast<float>(finalRadius),static_cast<float>(finalRadius)); // centra il cerchio sul punto
+      std::ostringstream oss2;
+      oss2 << "To change the speed of the simulation press Up/Down arrows." << '\n';
+      oss2 << "Current speed: " << subSteps << " iterations per frame" << '\n';
+      oss2 << "To change the dt (time between each calculated iteration) press Left/Right arrows." << '\n';
+      oss2 << "Current dt: " << dt << " seconds" << '\n';
+      oss2 << "Use the mouse or the trackpad to zoom in/out." << '\n';
 
-      double screenX = (windowWidth/2) + body.position.x * scale;
-      double screenY = (windowHeight/2) + body.position.y * scale;
-      circle.setPosition(static_cast<float>(screenX), static_cast<float>(screenY));
+      instructionsText.setString(oss2.str());
 
-      window.draw(circle);
+      window.draw(instructionsText);
+
+      window.display();
     }
-
-    // LEGENDE:
-    double currentEnergy = sim.consEnergy();
-    double currentMomentum = sim.consMomentum().module();
-    double currentAngMomentum = sim.consAngularMomentum();
-
-    // Formatta il testo in modo pulito (notazione scientifica per numeri molto grandi/piccoli)
-    std::ostringstream oss;
-    oss << std::scientific << std::setprecision(8); // 8 cifre decimali
-    oss << "Current Mechanical Energy: " << currentEnergy << " J\n";
-    oss << "Current Momentum: " << currentMomentum << " kg*m/s\n";
-    oss << "Current Angular Momentum:  " << currentAngMomentum << " kg*m^2/s\n";
-    oss << "Current number of bodies: " << sim.numBodies() << '\n';
-
-    // Assegna la stringa creata al testo e disegnalo
-    legendText.setString(oss.str());
-
-    window.draw(legendText);
-
-    std::ostringstream oss2;
-    oss2 << "To change the speed of the simulation press Up/Down arrows." << '\n';
-    oss2 << "Current speed: " << subSteps << " iterations per frame" << '\n';
-    oss2 << "To change the dt (time between each calculated iteration) press Left/Right arrows." << '\n';
-    oss2 << "Current dt: " << dt << " seconds" << '\n';
-    oss2 << "Use the mouse or the trackpad to zoom in/out." << '\n';
-
-    instructionsText.setString(oss2.str());
-
-    window.draw(instructionsText);
-
-    window.display();
   }
- }
- catch (const std::exception &e)
- {
+  catch (const std::exception &e)
+  {
     std::cerr << "Errore nel calcolo delle collisioni. " << e.what() << '\n';
     return EXIT_FAILURE;
- }
+  }
 
   std::cout << "L'energia oscilla tra " << sim.energyRange.max << " e " << sim.energyRange.min << '\n';
   std::cout << "Il momento angolare oscilla tra " << sim.angularMomentumRange.max << " e " << sim.angularMomentumRange.min << '\n';

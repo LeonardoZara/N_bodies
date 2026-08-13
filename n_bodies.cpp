@@ -8,8 +8,8 @@
 #include <numeric>
 #include <algorithm>
 #include <functional>
-#include "vicktor.hpp"
-#include "N_bodies.hpp"
+#include "vector2d.hpp"
+#include "n_bodies.hpp"
 
 namespace nb{
 void Simulation::loadFromFile(const std::string &filename)
@@ -57,9 +57,9 @@ void Simulation::addBody(double m, double posx, double posy, double velx, double
     bodies.emplace_back(m, posx, posy, velx, vely, r);
 }
 
-static Vicktor gravAcceleration(const std::vector<Planet> &bodies, size_t i, double G)
+static Vector2d gravAcceleration(const std::vector<Planet> &bodies, size_t i, double G)
 {
-    Vicktor acc{};
+    Vector2d acc{};
     for (size_t j = 0; j < bodies.size(); ++j)
     {
         if (j == i)
@@ -87,16 +87,16 @@ double Simulation::consEnergy() const
     {
         for (size_t i = 0; i < j; ++i)
         {
-            Vicktor distance = bodies[i].position - bodies[j].position;
+            Vector2d distance = bodies[i].position - bodies[j].position;
             u += -G * bodies[i].getMass() * bodies[j].getMass() / distance.module();
         }
     }
     return k + u;
 }
 
-Vicktor Simulation::centreOfMass() const
+Vector2d Simulation::centreOfMass() const
 {
-    Vicktor cmNumerator{0., 0.};
+    Vector2d cmNumerator{0., 0.};
     double totalMass{0.};
     for (const auto &body : bodies)
     {
@@ -115,7 +115,7 @@ double Simulation::totalMass() const
 
 double Simulation::consAngularMomentum() const
 {
-    Vicktor cm = centreOfMass();
+    Vector2d cm = centreOfMass();
     double angularMomentum{0};
     for (const auto &body : bodies)
     {
@@ -124,10 +124,10 @@ double Simulation::consAngularMomentum() const
     return angularMomentum;
 }
 
-Vicktor Simulation::consMomentum() const
+Vector2d Simulation::consMomentum() const
 {
 
-    return std::accumulate(bodies.begin(), bodies.end(), Vicktor{0., 0.}, [](Vicktor momentum, const Planet &p)
+    return std::accumulate(bodies.begin(), bodies.end(), Vector2d{0., 0.}, [](Vector2d momentum, const Planet &p)
                            { return momentum + (p.velocity * p.getMass()); });
 }
 
@@ -185,8 +185,8 @@ void Simulation::step(double dt)
                     major = j;
                     minor = i;
                 }
-                Vicktor posCm = ((bodies[i].position * bodies[i].getMass()) + (bodies[j].position * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
-                Vicktor velCm = ((bodies[i].velocity * bodies[i].getMass()) + (bodies[j].velocity * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
+                Vector2d posCm = ((bodies[i].position * bodies[i].getMass()) + (bodies[j].position * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
+                Vector2d velCm = ((bodies[i].velocity * bodies[i].getMass()) + (bodies[j].velocity * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
                 double placementRadius = bodies[i].getRadius() + bodies[j].getRadius();
                 double debrisRadius = bodies[minor].getRadius()*cbrt(1. / 8.);
                 double debrisVelocity = (bodies[i].velocity - bodies[j].velocity).module() * sqrt(bodies[major].getMass()/(bodies[major].getMass() + bodies[minor].getMass()));
@@ -242,9 +242,9 @@ void Simulation::step(double dt)
     }
     for (size_t i = 0; i < bodies.size(); ++i)
     {
-        Vicktor acc_old = bodies[i].acceleration;
-        Vicktor acc_new = gravAcceleration(bodies, i, G);
-        Vicktor acc_sum = acc_old + acc_new;
+        Vector2d acc_old = bodies[i].acceleration;
+        Vector2d acc_new = gravAcceleration(bodies, i, G);
+        Vector2d acc_sum = acc_old + acc_new;
         bodies[i].velocity = bodies[i].velocity + (acc_sum * (0.5 * dt));
         bodies[i].acceleration = acc_new;
     }
