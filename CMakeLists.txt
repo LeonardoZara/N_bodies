@@ -37,22 +37,22 @@ find_package(SFML 2.6 COMPONENTS graphics REQUIRED)
 
 # dichiara un eseguibile chiamato "progetto", prodotto a partire dai file sorgente indicati
 # sostituire "progetto" con il nome del proprio eseguibile e i file sorgente con i propri (con nomi sensati!)
-add_executable(progetto main.cpp vicktor.cpp N_bodies.cpp)
+add_executable(progetto main.cpp vector2d.cpp n_bodies.cpp)
 # nel caso si usi SFML. analogamente per eventuali altre librerie
 target_link_libraries(progetto PRIVATE sfml-graphics)
 
 # aggiungere eventuali altri eseguibili
 file(COPY dati.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
 file(COPY dati.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Release)
-file(COPY font.ttf DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
-file(COPY font.ttf DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Release)
+file(COPY open_sans.ttf DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
+file(COPY open_sans.ttf DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Release)
 
 # il testing e' abilitato di default
 # per disabilitarlo, passare -DBUILD_TESTING=OFF a cmake durante la fase di configurazione
  if (BUILD_TESTING)
 #
 # aggiungi l'eseguibile progetto.t
- add_executable(progetto_test test.cpp vicktor.cpp N_bodies.cpp)
+ add_executable(progetto_test test.cpp vector2d.cpp n_bodies.cpp)
 # aggiungi l'eseguibile progetto.t alla lista dei test
 add_test(NAME progetto_test COMMAND progetto_test)
 
