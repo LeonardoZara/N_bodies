@@ -123,34 +123,25 @@ TEST_CASE("Simulation::step - one body moving with constant velocity")
 TEST_CASE("Simulation::step - elliptical orbit")
 {
     nb::Simulation sim;
-    // Sole
-    sim.addBody(1.989e30, 0.0, 0.0, 0.0, -0.154894, 6.96e8);
-    // Pianeta in orbita ellittica
-    sim.addBody(5.972e24, 7.48e10, 0.0, 0.0, 51588.2, 6.371e6);
+    sim.addBody(1.989e30, 0.0, 0.0, 0.0, -0.154894, 6.96e8); //sun
+    sim.addBody(5.972e24, 7.48e10, 0.0, 0.0, 51588.2, 6.371e6); //planet 
     
     sim.initAccelerations();
 
-    // 1. Salviamo i valori fisici iniziali
     double initialEnergy = sim.consEnergy();
     double initialAngMom = sim.consAngularMomentum();
 
-    // 2. Facciamo avanzare la simulazione per un mese (30 giorni)
-    // Usiamo un dt di 3600 secondi (1 ora)
-    double dt = 3600.0;
+    double dt = 3600.0; //we let the simulation go on 
     for (int i = 0; i < 24 * 30; ++i)
     {
         sim.step(dt);
     }
 
-    // 3. Calcoliamo i valori fisici finali
     double finalEnergy = sim.consEnergy();
     double finalAngMom = sim.consAngularMomentum();
 
-    // 4. Verifichiamo la conservazione (con un margine di tolleranza)
-    // Nota: Lavorando con numeri astronomici giganteschi (es. 10^30), 
-    // i double perdono un po' di precisione. Usiamo epsilon() per dare
-    // una tolleranza relativa dell'1% (0.01) sui controlli.
-    CHECK(finalEnergy == doctest::Approx(initialEnergy).epsilon(0.01));
+    
+    CHECK(finalEnergy == doctest::Approx(initialEnergy).epsilon(0.01));//tollerance error of 1% 
     CHECK(finalAngMom == doctest::Approx(initialAngMom).epsilon(0.01));
 }
 
@@ -164,7 +155,7 @@ TEST_CASE("Simulation::step - merged bodies")
     REQUIRE(sim.numBodies() == 2);
     sim.step(1.0);
 
-    CHECK(sim.numBodies() == 1);// bodies merged
+    CHECK(sim.numBodies() == 1); //bodies merged
     CHECK(sim.getBody(0).getMass() == doctest::Approx(2.0));
 }
 
@@ -207,7 +198,7 @@ TEST_CASE("Simulation::step - explosive collision with debris")
 
     REQUIRE(sim.numBodies() == 2);
     
-    sim.step(0.0002); // dt piccolo per innescare solo il contatto
+    sim.step(0.0002); //we only need a small dt to make the collision happen
 
     CHECK(sim.numBodies() >= 3);
     

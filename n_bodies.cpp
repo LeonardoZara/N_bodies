@@ -156,25 +156,25 @@ namespace nb
 
     void Simulation::step(double dt)
     {
-        // controllo collisioni:
+        // collisions check:
         double totalMassUnmerged{totalMass()};
         bool collision = false;
         size_t numberBodies{bodies.size()};
         for (size_t j = 1; j < numberBodies; ++j)
         {
-            if (bodies[j].getMass() == 0.0) // per evitare calcoli inutili toglie dal check i corpi già scontrati ma non ancora eliminati dal vector.
+            if (bodies[j].getMass() == 0.0) //removes the alredy merged bodies
             {
                 continue;
             }
             for (size_t i = 0; i < j; ++i)
             {
-                if (bodies[i].getMass() == 0.0) // per evitare calcoli inutili toglie dal check i corpi già scontrati ma non ancora eliminati dal vector.
+                if (bodies[i].getMass() == 0.0)
                 {
                     continue;
                 }
 
                 if (((bodies[i].position - bodies[j].position).module() <= (bodies[i].getRadius() + bodies[j].getRadius())) && explosiveCollision(i, j) == true)
-                // urto con velRelativa>=velFuga, allora urto in cui il corpo minore si frantuma in detriti, che vengono espulsi con la stessa velocità di impatto.
+                // collision with velRel>=velEsc, the smallest body shatters in debris that move at the same speed the body had.
                 {
                     size_t major{0};
                     size_t minor{0};
@@ -213,7 +213,7 @@ namespace nb
                 else
                 {
                     if ((bodies[i].position - bodies[j].position).module() <= (bodies[i].getRadius() + bodies[j].getRadius()))
-                    // urto con velRelativa<velFuga, allora urto totalmente anelastico in cui i due corpi si uniscono.
+                    // collision with velRel<velEsc, the bodies merged.
                     {
                         bodies[j].position = ((bodies[i].position * bodies[i].getMass()) + (bodies[j].position * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
                         bodies[j].velocity = ((bodies[i].velocity * bodies[i].getMass()) + (bodies[j].velocity * bodies[j].getMass())) * (1 / (bodies[i].getMass() + bodies[j].getMass()));
@@ -230,8 +230,8 @@ namespace nb
                                     [](const Planet &p)
                                     { return p.getMass() == 0.0; }),
                      bodies.end());
-        double epsilon = 1e-7 * totalMassUnmerged;               // Tolleranza per gli errori di arrotondamento
-        if (std::abs(totalMass() - totalMassUnmerged) > epsilon) // Si attiva solo se 3 o più corpi si toccano nello stesso momento, e l'algoritmo di "trasferimento massa" si romperebbe.
+        double epsilon = 1e-7 * totalMassUnmerged;               // Error Tollerance 
+        if (std::abs(totalMass() - totalMassUnmerged) > epsilon) // it activates when more than 3 body collide.
         {
             throw std::runtime_error("Ci sono state delle collisioni con più di due corpi in contemporanea, non calcolabili da questo programma.");
         }
