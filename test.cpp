@@ -171,7 +171,7 @@ TEST_CASE("Simulation::step - collision with no debris")
 
     REQUIRE(sim.numBodies() == 2);
     // dt=10s
-    sim.step(10.0); 
+    sim.step(10); 
     CHECK(sim.numBodies() == 1);
     
     // mass conservation
