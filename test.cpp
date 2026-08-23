@@ -203,7 +203,7 @@ TEST_CASE("Simulation::step - explosive collision with debris")
     for (int k = 0; k < 20000 && sim.numBodies() == 2; ++k)
     {
         sim.step(1e-4);
-    } //we only need a small dt to make the collision happen
+    }
 
     CHECK(sim.numBodies() >= 3);
     
@@ -213,5 +213,5 @@ TEST_CASE("Simulation::step - explosive collision with debris")
     // momentum conservation
     nb::Vector2d finalMomentum = sim.consMomentum();
     CHECK(finalMomentum.x == doctest::Approx(initialMomentum.x).epsilon(0.001));
-    CHECK(finalMomentum.y == doctest::Approx(initialMomentum.y).epsilon(0.001).scale(std::abs(initialMomentum.x)));
+    CHECK(finalMomentum.y == doctest::Approx(initialMomentum.y).epsilon(0.001).scale(std::abs(initialMomentum.x))); //scale is used to avoid multiplication with zero.
 }

@@ -34,9 +34,6 @@ int main()
   sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "N-Body Simulation");
   window.setPosition(sf::Vector2i(50, 50));
 
-  // roba per lo zoom
-  // sf::View view = window.getDefaultView();
-
   std::vector<sf::Color> palette = {
       sf::Color::Red,
       sf::Color::Green,
@@ -103,7 +100,7 @@ int main()
     scale = ((windowWidth / 2.0) - screenMargin) / maxInitialDist;
   }
 
-  double dt = 60.0;
+  double dt = 5.0;
   const double dtMin = 0.01;
   const double dtMax = 21600.0;
   int subSteps = 50;
