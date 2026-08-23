@@ -1,9 +1,9 @@
 # massa      x             y        vx          vy          radius
 #
 # figure 8
-1.989e30      -145112652256  36365894488   13885.177452198    12887.364719455     6.9634e8
-1.989e30      145112652256   -36365894488  13885.177452198    12887.364719455     6.9634e8
-1.989e30      0.0            0.0           -27770.354904395   -25774.72943891     6.9634e8
+#1.989e30      -145112652256  36365894488   13885.177452198    12887.364719455     6.9634e8
+#1.989e30      145112652256   -36365894488  13885.177452198    12887.364719455     6.9634e8
+#1.989e30      0.0            0.0           -27770.354904395   -25774.72943891     6.9634e8
 #
 # Solar System
 #1.989e30    -1.509e9       0.0     0.0         -15.91      6.9634e8
@@ -20,19 +20,15 @@
 # Pluto
 #1.303e22     5.906e12      0.0          0.0        4740.0     1.188e6
 #
-# anelastic collision between two earths
-#5.972e24     -5.0e9      0.0        0.0     0.0        6.371e6
-#5.972e24      5.0e9      0.0        0.0     0.0        6.371e6
-#
-# anelastic collision between Earth and Moon
+# collision between Earth and Moon with debris  OK
 #5.972e24     0.0         0.0        0.0        0.0        6.371e6
 #7.342e22     0.0         5.0e7      0.0       -8000.0     1.737e6
 #
-# collision with debris between two earths
+# collision with debris between two earths OK
 #5.972e24     -5.0e11      0.0        5000.0    0.0        6.371e6
 #5.972e24      5.0e11      0.0       -5000.0    0.0        6.371e6
 #
-# collision with debris between Earth and Moon
+# collision with debris between Earth and Moon OK
 #5.972e24     0.0         0.0        0.0        0.0        6.371e6
 #7.342e22     0.0         5.0e9      0.0       -14000.0    1.737e6
 #
@@ -40,7 +36,3 @@
 #1.989e30     0.0        -1.5e9      0.0        0.0        6.963e8
 #5.972e24    -5.0e7       0.0        15000.0    0.0        6.371e6
 #5.972e24     5.0e7       0.0       -15000.0    0.0        6.371e6
-# collisions in a 3 body system with/without debris, depending from the dt.
-#4.0e30       0.0         0.0        0.0        0.0        6.963e8
-#5.972e24     1.5e9       5.0e7     -70000.0   -10000.0    6.371e6
-#5.972e24     1.5e9      -5.0e7     -70000.0    10000.0    6.371e6

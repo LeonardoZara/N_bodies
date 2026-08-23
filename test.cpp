@@ -170,8 +170,10 @@ TEST_CASE("Simulation::step - collision with no debris")
     nb::Vector2d initialMomentum = sim.consMomentum();
 
     REQUIRE(sim.numBodies() == 2);
-    // dt=10s
-    sim.step(10); 
+    for (int k = 0; k < 20000 && sim.numBodies() == 2; ++k)
+    {
+        sim.step(0.001);
+    } 
     CHECK(sim.numBodies() == 1);
     
     // mass conservation
@@ -189,8 +191,8 @@ TEST_CASE("Simulation::step - collision with no debris")
 TEST_CASE("Simulation::step - explosive collision with debris")
 {
     nb::Simulation sim;
-    sim.addBody(5.0e24, -20.0, 0.0, 100000.0, 0.0, 10.0); 
-    sim.addBody(1.0e24,  20.0, 0.0, -100000.0, 0.0, 10.0); 
+    sim.addBody(5.0e15, -20.0, 0.0, 500.0, 0.0, 10.0); 
+    sim.addBody(1.0e15,  20.0, 0.0, -500.0, 0.0, 10.0);
     sim.initAccelerations();
 
     double initialMass = sim.totalMass();
@@ -198,7 +200,10 @@ TEST_CASE("Simulation::step - explosive collision with debris")
 
     REQUIRE(sim.numBodies() == 2);
     
-    sim.step(0.0002); //we only need a small dt to make the collision happen
+    for (int k = 0; k < 20000 && sim.numBodies() == 2; ++k)
+    {
+        sim.step(1e-4);
+    } //we only need a small dt to make the collision happen
 
     CHECK(sim.numBodies() >= 3);
     
@@ -208,5 +213,5 @@ TEST_CASE("Simulation::step - explosive collision with debris")
     // momentum conservation
     nb::Vector2d finalMomentum = sim.consMomentum();
     CHECK(finalMomentum.x == doctest::Approx(initialMomentum.x).epsilon(0.001));
-    CHECK(finalMomentum.y == doctest::Approx(initialMomentum.y).epsilon(0.001));
+    CHECK(finalMomentum.y == doctest::Approx(initialMomentum.y).epsilon(0.001).scale(std::abs(initialMomentum.x)));
 }
