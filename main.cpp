@@ -99,7 +99,7 @@ int main()
     scale = ((windowWidth / 2.0) - screenMargin) / maxInitialDist;
   }
 
-  double dt = 5.0;
+  double dt = 10.0;
   const double dtMin = 0.01;
   const double dtMax = 21600.0;
   int subSteps = 50;
