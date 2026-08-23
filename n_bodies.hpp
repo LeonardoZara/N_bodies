@@ -44,7 +44,7 @@ namespace nb
         {
             if (newMass < 0.0)
             {
-                throw std::invalid_argument("La massa non può essere negativa.");
+                throw std::invalid_argument("Mass can't be negative.");
             }
             mass = newMass;
         }
@@ -52,7 +52,7 @@ namespace nb
         {
             if (newRadius < 0.0)
             {
-                throw std::invalid_argument("Il raggio non deve essere negativo.");
+                throw std::invalid_argument("Radius can't be negative.");
             }
             radius = newRadius;
         }

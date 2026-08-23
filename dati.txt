@@ -1,4 +1,4 @@
-# massa      x             y        vx          vy          radius
+# mass (kg)      x (m)        y (m)        vx (m/s)         vy (m/s)         radius (m)
 #
 # figure 8
 #1.989e30      -145112652256  36365894488   13885.177452198    12887.364719455     6.9634e8
@@ -15,12 +15,17 @@
 #5.683e26     1.432e12      0.0     0.0         9680.0      5.8232e7
 #8.681e25     2.867e12      0.0     0.0         6800.0      2.5362e7
 #1.024e26     4.515e12      0.0     0.0         5430.0      2.4622e7
-#1.303e22     5.906e12      0.0          0.0        4740.0     1.188e6
+#1.303e22     5.906e12      0.0     0.0         4740.0      1.188e6
 #
-#3 body system with inelastic collisions (working with low dt)
+# 3 body system with inelastic collisions (working with low dt)
 #3.0e24       1.0e8       3.0e8      0.0        0.0        3.0e5
 #4.0e24      -2.0e8      -1.0e8      0.0        0.0        3.0e5
 #5.0e24       1.0e8      -1.0e8      0.0        0.0        3.0e5
+#
+# 3 body system with chained collisions with debris (the behavour changes with the dt)
+1.989e30     0.0           0.0         0.0        0.0        6.9634e8
+5.972e24     1.496e11      0.0         0.0        -29780.0    6.371e6
+5.972e24     -1.496e11     0.0        0.0       -29780.0    6.371e6
 #
 # inelastic collision between Earth and Moon
 #5.972e24     0.0         0.0        0.0        0.0      6.371e6

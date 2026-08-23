@@ -112,7 +112,7 @@ TEST_CASE("Simulation::step - one body moving with constant velocity")
     sim.addBody(1.0, 0.0, 0.0, 2.0, 3.0, 0.1);
     sim.initAccelerations(); // no other body. null acceleration
 
-    sim.step(10.0); // dt = 10 s
+    sim.step(10.0);
 
     CHECK(sim.getBody(0).position.x == doctest::Approx(20.0));
     CHECK(sim.getBody(0).position.y == doctest::Approx(30.0));
@@ -141,7 +141,7 @@ TEST_CASE("Simulation::step - elliptical orbit")
     double finalAngMom = sim.consAngularMomentum();
 
     
-    CHECK(finalEnergy == doctest::Approx(initialEnergy).epsilon(0.01));//tollerance error of 1% 
+    CHECK(finalEnergy == doctest::Approx(initialEnergy).epsilon(0.01));//tolerance error of 1% 
     CHECK(finalAngMom == doctest::Approx(initialAngMom).epsilon(0.01));
 }
 

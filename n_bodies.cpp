@@ -18,7 +18,7 @@ namespace nb
         std::ifstream file(filename);
         if (!file.is_open())
         {
-            throw std::runtime_error("Impossibile aprire il file: " + filename);
+            throw std::runtime_error("It's impossible to open the file: " + filename);
         }
         bodies.clear();
         std::string line;
@@ -32,25 +32,25 @@ namespace nb
             double m, posx, posy, velx, vely, radius;
             if (!(iss >> m >> posx >> posy >> velx >> vely >> radius))
             {
-                throw std::invalid_argument("Riga malformata nel file dati: " + line);
+                throw std::invalid_argument("Malformed line in the data file: " + line);
             }
             if (m < 0)
             {
-                throw std::invalid_argument("La massa non può essere negativa." + line);
+                throw std::invalid_argument("Mass can't be negative." + line);
             }
             if (radius <= 0)
             {
-                throw std::invalid_argument("Il raggio deve essere positivo." + line);
+                throw std::invalid_argument("Radius has to be positive." + line);
             }
             if (velx >= 3e8 || vely >= 3e8 || velx <= -3e8 || vely <= -3e8)
             {
-                throw std::invalid_argument("La velocità dei corpi deve essere minore di quella della luce." + line);
+                throw std::invalid_argument("The speed of the bodies has to be less than the speed of light." + line);
             }
             bodies.emplace_back(m, posx, posy, velx, vely, radius);
         }
 
         if (bodies.empty())
-            throw std::runtime_error("Nessun corpo caricato dal file: " + filename);
+            throw std::runtime_error("No body loaded form the file: " + filename);
     }
 
     void Simulation::addBody(double m, double posx, double posy, double velx, double vely, double r)
@@ -162,7 +162,7 @@ namespace nb
         size_t numberBodies{bodies.size()};
         for (size_t j = 1; j < numberBodies; ++j)
         {
-            if (bodies[j].getMass() == 0.0) //removes the alredy merged bodies
+            if (bodies[j].getMass() == 0.0) // removes the alredy merged bodies
             {
                 continue;
             }
@@ -172,7 +172,6 @@ namespace nb
                 {
                     continue;
                 }
-
                 if (((bodies[i].position - bodies[j].position).module() <= (bodies[i].getRadius() + bodies[j].getRadius())) && explosiveCollision(i, j) == true)
                 // collision with velRel>=velEsc, the smallest body shatters in debris that move at the same speed the body had.
                 {
@@ -230,8 +229,8 @@ namespace nb
                                     [](const Planet &p)
                                     { return p.getMass() == 0.0; }),
                      bodies.end());
-        double epsilon = 1e-7 * totalMassUnmerged;               // Error Tollerance 
-        if (std::abs(totalMass() - totalMassUnmerged) > epsilon) // it activates when more than 3 body collide.
+        double epsilon = 1e-7 * totalMassUnmerged;               // Error Tollerance due to the precision of doubles
+        if (std::abs(totalMass() - totalMassUnmerged) > epsilon) // it activates when more than 3 body collide simultaneously.
         {
             throw std::runtime_error("Ci sono state delle collisioni con più di due corpi in contemporanea, non calcolabili da questo programma.");
         }
@@ -239,6 +238,7 @@ namespace nb
         {
             initAccelerations();
         }
+
         // Velocity verlet:
         for (auto &body : bodies)
         {

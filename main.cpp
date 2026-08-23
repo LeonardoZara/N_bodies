@@ -58,12 +58,11 @@ int main()
   instructionsText.setFont(font);
   instructionsText.setCharacterSize(15);
   instructionsText.setFillColor(sf::Color::White);
-  instructionsText.setPosition(10.f, 650.f);
+  instructionsText.setPosition(10.f, 700.f);
 
-  const size_t trailLength = 3000; 
+  const size_t trailLength = 3000;
   std::vector<std::deque<sf::Vector2<double>>> trails(sim.numBodies());
 
-  
   const double r_min = 2.4397e6; //  Mercury radius
   const double r_max = 6.9634e8; //  Sun radius
   const float graphic_min = 2.0f;
@@ -89,7 +88,7 @@ int main()
     return graphic_min + static_cast<float>(t * (graphic_max - graphic_min));
   };
 
-  // Setting the initial zoom based on the further body
+  // Setting the initial zoom based on the furthest body
   double maxInitialDist{0.};
   maxInitialDist = (*std::max_element(sim.begin(), sim.end(), [](const nb::Planet &a, const nb::Planet &b)
                                       { return a.position.module() < b.position.module(); }))
@@ -118,7 +117,6 @@ int main()
         {
           window.close();
         }
-
         if (event.type == sf::Event::MouseWheelScrolled)
         {
           if (event.mouseWheelScroll.delta > 0)
@@ -167,14 +165,13 @@ int main()
         auto &body = sim.getBody(i);
         sf::Color bodyColor = palette[i % palette.size()];
 
-        //we save the body position for the trail
+        // we save the body position for the trail
         trails[i].push_back(sf::Vector2<double>(body.position.x, body.position.y));
         if (trails[i].size() > trailLength)
         {
           trails[i].pop_front();
         }
 
-        
         sf::VertexArray trailLine(sf::LineStrip, trails[i].size());
         for (size_t j = 0; j < trails[i].size(); ++j)
         {
@@ -193,7 +190,7 @@ int main()
 
         sf::CircleShape circle(static_cast<float>(finalRadius));
         circle.setFillColor(bodyColor);
-        circle.setOrigin(static_cast<float>(finalRadius), static_cast<float>(finalRadius)); // sets the circle centre where the body is
+        circle.setOrigin(static_cast<float>(finalRadius), static_cast<float>(finalRadius));
 
         double screenX = (windowWidth / 2) + body.position.x * scale;
         double screenY = (windowHeight / 2) + body.position.y * scale;
@@ -202,20 +199,13 @@ int main()
         window.draw(circle);
       }
 
-      // LEGENDA:
-      double currentEnergy = sim.consEnergy();
-      double currentMomentum = sim.consMomentum().module();
-      double currentAngMomentum = sim.consAngularMomentum();
-
-      
       std::ostringstream oss;
       oss << std::scientific << std::setprecision(8); // 8 significant figures
-      oss << "Current Mechanical Energy: " << currentEnergy << " J\n";
-      oss << "Current Momentum: " << currentMomentum << " kg*m/s\n";
-      oss << "Current Angular Momentum:  " << currentAngMomentum << " kg*m^2/s\n";
+      oss << "Current Mechanical Energy: " << sim.consEnergy() << " J\n";
+      oss << "Current Momentum: " << sim.consMomentum().module() << " kg*m/s\n";
+      oss << "Current Angular Momentum:  " << sim.consAngularMomentum() << " kg*m^2/s\n";
       oss << "Current number of bodies: " << sim.numBodies() << '\n';
 
-      
       legendText.setString(oss.str());
 
       window.draw(legendText);
