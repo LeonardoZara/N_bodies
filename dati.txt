@@ -34,8 +34,3 @@
 #3.0e24       1.0e8       3.0e8      0.0        0.0        3.0e5
 #4.0e24      -2.0e8      -1.0e8      0.0        0.0        3.0e5
 #5.0e24       1.0e8      -1.0e8      0.0        0.0        3.0e5
-#
-# 3 body system with chained collisions with debris (the behavour changes with the dt)
-#1.989e30     0.0           0.0         0.0        0.0        6.9634e8
-#5.972e24     1.496e11      0.0         0.0        -29780.0    6.371e6
-#5.972e24     -1.496e11     0.0        0.0       -29780.0    6.371e6
