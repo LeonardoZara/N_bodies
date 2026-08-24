@@ -1,5 +1,5 @@
 # Simulation of an N-Body system
-Romani Sofia (matr. 0001215422), Zara Leonardo (matr. 0001242255)
+Romani Sofia (matr. 0001215422), Zara Leonardo (matr. 0001242255), 
 23 August 2026
 
 ## 1 Introduction
@@ -29,16 +29,11 @@ The graphical interface was built using SFML and we implemented the following fe
 To compile and execute the project on Ubuntu-based Linux systems the SFML library must be installed. The user can choose which astronomical configuration to display by removing the "#" from the relevant lines in the file dati.txt (each one describes a body) or writing one or more lines that contain the 6 space-separated numerical parameters in this order: Mass (kg), PositionX (m), PositionY (m), VelocityX (m/s), VelocityY (m/s), Radius (m). The parameters have physical limits such as the light speed for the velocity, a non negative mass and radius. Finally to compile and execute write the following command on the command line of Ubuntu terminal:
 
 ```bash
-cmake SB build G" Ninja Multi-Config"
-cmake build build
-config Debug
-cmake build build
-config Debug target test
-cmake build build
-config Release
-cmake build build
-config Release
-target test
+cmake -S . -B build -G"Ninja Multi-Config"
+cmake --build build --config Debug
+cmake --build build --config Debug --target test
+cmake --build build --config Release
+cmake --build build --config Release --target test
 cd build/Release
 ./progetto_test
 ./progetto
