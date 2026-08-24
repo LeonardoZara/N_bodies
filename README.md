@@ -3,9 +3,7 @@ Romani Sofia (matr. 0001215422), Zara Leonardo (matr. 0001242255),
 23 August 2026
 
 ## 1 Introduction
-In celestial mechanics two-body systems follow Keplerian orbits and have exact analytical solutions. The problem arises when more than two bodies begin to interact with each other: the differential equations that describe their motions are not integrable and it is not possible to find a function of time for the positions of the bodies. The only way to predict their motions is to estimate them using numerical methods.
-
-The goal of the program that is about to be described is to simulate and show graphically how more than two bodies behave when in the presence of each other. To do so we used an algorithm called Velocity Verlet, a numerical method that allows the solution of differential equations through the discretization of time. Using a time step (dt) maintains the conservation of energy and angular momentum.
+In celestial mechanics, two-body systems follow Keplerian orbits and have exact analytical solutions. The problem arises when more than two bodies begin to interact with each other: the differential equations that describe their motion are non-integrable, and it is not possible to express their positions as explicit functions of time. The only way to predict their motion is to approximate it using numerical methods. The goal of the program described here is to simulate and graphically visualize how these bodies behave in the presence of each other. To do so, we used the Velocity Verlet algorithm, a numerical method that solves differential equations through time discretization. By using a discrete small time step (dt), this method successfully maintains the conservation of energy, momentum, and angular momentum.
 
 ## 2 Implementation choices
 The program has been divided into multiple header and source files to ensure a clean separation of concerns.
